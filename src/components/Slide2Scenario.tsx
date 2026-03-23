@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Rocket, Plus, Clock, Map } from 'lucide-react';
+import { useSoundContext } from '../App';
 
 interface Record {
   x: number;
@@ -15,11 +16,13 @@ interface Props {
 }
 
 export default function Slide2Scenario({ records, setRecords, hours, setHours }: Props) {
-  const speed = 2; // 万千米/小时
+  const { play } = useSoundContext();
+  const speed = 2;
   const distance = hours * speed;
 
   const handleRecord = () => {
     if (!records.find(r => r.x === hours)) {
+      play('click');
       setRecords(prev => [...prev, { x: hours, y: distance }].sort((a, b) => a.x - b.x));
     }
   };

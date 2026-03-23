@@ -1,12 +1,14 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Rocket, PlayCircle, Sparkles } from 'lucide-react';
+import { useSoundContext } from '../App';
 
 interface Props {
   onNext: () => void;
 }
 
 export default function Slide1Intro({ onNext }: Props) {
+  const { play } = useSoundContext();
   const [isLaunching, setIsLaunching] = useState(false);
   const [isWarping, setIsWarping] = useState(false);
   const [shootingStars, setShootingStars] = useState<any[]>([]);
@@ -107,12 +109,11 @@ export default function Slide1Intro({ onNext }: Props) {
   }, []);
 
   const handleLaunch = () => {
+    play('launch');
     setIsLaunching(true);
-    // Trigger warp speed after engine buildup
     setTimeout(() => {
       setIsWarping(true);
     }, 1000);
-    // Transition to next slide
     setTimeout(() => {
       onNext();
     }, 3000); 
