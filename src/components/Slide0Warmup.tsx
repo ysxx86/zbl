@@ -105,11 +105,43 @@ export default function Slide0Warmup({ onNext }: Props) {
               className="text-center"
             >
               <motion.div
-                animate={{ y: [-10, 10, -10] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="mb-8"
+                animate={{ 
+                  y: [-12, 12, -12],
+                  rotate: [-2, 2, -2],
+                  scale: [1, 1.02, 1]
+                }}
+                transition={{ 
+                  duration: 4, 
+                  repeat: Infinity, 
+                  ease: [0.25, 0.1, 0.25, 1],
+                  times: [0, 0.5, 1]
+                }}
+                className="mb-8 relative"
               >
-                <Rocket size={120} className="text-cyan-400 mx-auto drop-shadow-[0_0_30px_rgba(34,211,238,0.8)]" />
+                {/* 粒子喷射效果 */}
+                {[...Array(12)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute left-1/2 -translate-x-1/2 w-2 h-8 bg-gradient-to-t from-cyan-400 via-blue-500 to-transparent rounded-full blur-sm"
+                    style={{
+                      bottom: '-20px',
+                      transform: `translateX(-50%) rotate(${-15 + i * 3}deg)`,
+                      originY: 0,
+                    }}
+                    animate={{
+                      opacity: [0.8, 0.3, 0.8],
+                      scaleY: [1, 1.5, 1],
+                    }}
+                    transition={{
+                      duration: 0.3 + i * 0.05,
+                      repeat: Infinity,
+                      delay: i * 0.02,
+                    }}
+                  />
+                ))}
+                {/* 光晕 */}
+                <div className="absolute inset-0 blur-xl bg-cyan-400/30 rounded-full scale-150" />
+                <Rocket size={120} className="text-cyan-400 mx-auto drop-shadow-[0_0_30px_rgba(34,211,238,0.8)] relative z-10" />
               </motion.div>
               
               <h1 className="text-6xl md:text-8xl font-black mb-6 bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 text-transparent bg-clip-text drop-shadow-[0_0_30px_rgba(192,132,252,0.5)]">
@@ -285,12 +317,24 @@ export default function Slide0Warmup({ onNext }: Props) {
                   距离和时间之间有神奇的关系，让我们深入探索！
                 </p>
                 <motion.button
-                  whileHover={{ scale: 1.05, boxShadow: "0 0_60px_rgba(34,211,238,0.6)" }}
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 60px rgba(34,211,238,0.6)" }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLaunch}
-                  className="flex items-center gap-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-16 py-8 rounded-full text-4xl font-bold shadow-[0_0_40px_rgba(34,211,238,0.4)] border-2 border-cyan-300/50"
+                  className="flex items-center gap-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-16 py-8 rounded-full text-4xl font-bold shadow-[0_0_40px_rgba(34,211,238,0.4)] border-2 border-cyan-300/50 relative overflow-hidden"
                 >
-                  <Rocket size={48} /> 启动飞船，开始探索！
+                  {/* 按钮光效扫描 */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                    animate={{ x: ['-100%', '100%'] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+                  />
+                  <motion.span
+                    animate={{ rotate: [0, -15, 15, 0], x: [0, -3, 3, 0] }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                  >
+                    <Rocket size={48} />
+                  </motion.span>
+                  <span className="relative z-10">启动飞船，开始探索！</span>
                 </motion.button>
               </motion.div>
             </motion.div>
