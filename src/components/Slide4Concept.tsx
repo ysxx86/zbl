@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, CheckCircle2, XCircle, GripHorizontal, LockOpen, Lock } from 'lucide-react';
+import { useSoundContext } from '../App';
 
 interface DraggableItem {
   id: string;
@@ -17,6 +18,7 @@ const initialItems: DraggableItem[] = [
 ];
 
 export default function Slide4Concept() {
+  const { play } = useSoundContext();
   const [items, setItems] = useState<DraggableItem[]>(initialItems);
   const [showDefinition, setShowDefinition] = useState(false);
 
@@ -28,12 +30,27 @@ export default function Slide4Concept() {
   const handleDrop = (e: React.DragEvent, zone: 'yes' | 'no' | 'unclassified') => {
     e.preventDefault();
     const id = e.dataTransfer.getData('text/plain');
+    const item = items.find(i => i.id === id);
+    if (item) {
+      if (zone === 'yes' && item.isProportional) {
+        play('correct');
+      } else if (zone === 'no' && !item.isProportional) {
+        play('correct');
+      } else if (zone !== 'unclassified') {
+        play('wrong');
+      }
+    }
     setItems(prev => prev.map(item => item.id === id ? { ...item, zone } : item));
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleShowDefinition = () => {
+    play('reveal');
+    setShowDefinition(true);
   };
 
   const unclassifiedItems = items.filter(i => i.zone === 'unclassified');
@@ -65,7 +82,7 @@ export default function Slide4Concept() {
                 exit={{ scale: 1.1, opacity: 0, filter: 'blur(10px)' }}
                 whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(34,211,238,0.5)" }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setShowDefinition(true)}
+                onClick={handleShowDefinition}
                 className="flex items-center gap-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-12 py-8 rounded-full text-4xl font-black shadow-2xl border-2 border-cyan-300 cursor-pointer"
               >
                 <Lock size={48} /> 点击提取核心规律

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Square, Hand, Lightbulb } from 'lucide-react';
+import { useSoundContext } from '../App';
 
 export default function Slide5Square() {
+  const { play } = useSoundContext();
   const [side, setSide] = useState(1);
   const [revealed, setRevealed] = useState<number[]>([]);
 
@@ -10,6 +12,7 @@ export default function Slide5Square() {
 
   const handleReveal = (index: number) => {
     if (!revealed.includes(index)) {
+      play('reveal');
       setRevealed(prev => [...prev, index]);
     }
   };

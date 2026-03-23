@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Table, Hand, Lightbulb } from 'lucide-react';
+import { useSoundContext } from '../App';
 
 interface Record {
   x: number;
@@ -12,7 +13,7 @@ interface Props {
 }
 
 export default function Slide3Table({ records }: Props) {
-  // If no records from Mod 1, use default space data
+  const { play } = useSoundContext();
   const data = records.length > 0 ? records : [
     { x: 1, y: 2 },
     { x: 2, y: 4 },
@@ -25,6 +26,7 @@ export default function Slide3Table({ records }: Props) {
 
   const handleReveal = (index: number) => {
     if (!revealed.includes(index)) {
+      play('reveal');
       setRevealed(prev => [...prev, index]);
     }
   };
