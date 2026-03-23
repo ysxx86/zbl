@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, CheckCircle2, XCircle, GripHorizontal, LockOpen, Lock } from 'lucide-react';
+import { BookOpen, CheckCircle2, XCircle, GripHorizontal, LockOpen, Lock, Lightbulb, CheckSquare } from 'lucide-react';
 import { useSoundContext } from '../App';
 
 interface DraggableItem {
@@ -17,10 +17,17 @@ const initialItems: DraggableItem[] = [
   { id: '4', text: '宇航员的年龄与身高', isProportional: false, zone: 'unclassified' },
 ];
 
+const conditions = [
+  { id: 1, text: '两种量必须是相关联的量', detail: '一种量变化，另一种量也随着变化' },
+  { id: 2, text: '变化方向相同', detail: '一种量增加，另一种量也增加；一种量减少，另一种量也减少' },
+  { id: 3, text: '比值（商）一定', detail: '相对应的两个数的比值是固定的常数' },
+];
+
 export default function Slide4Concept() {
   const { play } = useSoundContext();
   const [items, setItems] = useState<DraggableItem[]>(initialItems);
   const [showDefinition, setShowDefinition] = useState(false);
+  const [showConditions, setShowConditions] = useState(false);
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
     e.dataTransfer.setData('text/plain', id);
@@ -53,9 +60,15 @@ export default function Slide4Concept() {
     setShowDefinition(true);
   };
 
+  const handleShowConditions = () => {
+    play('reveal');
+    setShowConditions(true);
+  };
+
   const unclassifiedItems = items.filter(i => i.zone === 'unclassified');
   const yesItems = items.filter(i => i.zone === 'yes');
   const noItems = items.filter(i => i.zone === 'no');
+  const allClassified = unclassifiedItems.length === 0;
 
   return (
     <div className="flex flex-col h-full bg-slate-950 p-6 md:p-12 text-slate-100 relative overflow-hidden">
@@ -63,10 +76,10 @@ export default function Slide4Concept() {
 
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 z-10">
         <h2 className="text-4xl md:text-5xl font-black text-cyan-400 mb-4 flex items-center gap-4 drop-shadow-md">
-          <BookOpen size={48} /> 模块三：揭开“正比例”的神秘面纱
+          <BookOpen size={48} /> 模块三：揭开"正比例"的神秘面纱
         </h2>
         <p className="text-2xl md:text-3xl text-slate-300 font-medium leading-relaxed">
-          刚才飞船的“距离与时间”隐藏着一个数学中非常重要的终极规律！
+          刚才飞船的"距离与时间"隐藏着一个数学中非常重要的终极规律！
         </p>
       </motion.div>
 
@@ -193,6 +206,80 @@ export default function Slide4Concept() {
                   </div>
                 ))}
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Show Conditions Button - Only show after all items are classified */}
+        <AnimatePresence>
+          {showDefinition && allClassified && !showConditions && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              className="w-full flex justify-center"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(250,204,21,0.5)" }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleShowConditions}
+                className="flex items-center gap-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-12 py-6 rounded-full text-3xl font-bold shadow-2xl border-2 border-yellow-300 cursor-pointer"
+              >
+                <Lightbulb size={40} /> 总结：判断正比例的必要条件
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Conditions Panel */}
+        <AnimatePresence>
+          {showConditions && (
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.9 }}
+              transition={{ duration: 0.5, type: "spring" }}
+              className="w-full bg-gradient-to-r from-yellow-900/40 to-orange-900/40 backdrop-blur-md p-8 rounded-3xl shadow-2xl border-2 border-yellow-500/50"
+            >
+              <h3 className="text-4xl font-black text-yellow-400 mb-8 flex items-center justify-center gap-4">
+                <CheckSquare size={44} /> 判断正比例的三个必要条件
+              </h3>
+              
+              <div className="text-2xl text-center mb-6 text-yellow-100 font-medium">
+                ⚠️ 三个条件<strong className="text-3xl text-yellow-300 mx-2">必须同时成立</strong>，才能判断为正比例！
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {conditions.map((condition, index) => (
+                  <motion.div
+                    key={condition.id}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.2 }}
+                    className="bg-slate-900/80 p-6 rounded-2xl border-2 border-yellow-500/30 text-center"
+                  >
+                    <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center text-3xl font-black text-slate-900 mx-auto mb-4 shadow-lg">
+                      {condition.id}
+                    </div>
+                    <h4 className="text-2xl font-bold text-yellow-300 mb-3">{condition.text}</h4>
+                    <p className="text-lg text-slate-300">{condition.detail}</p>
+                  </motion.div>
+                ))}
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="mt-8 text-center"
+              >
+                <div className="inline-flex items-center gap-4 bg-emerald-900/50 px-8 py-4 rounded-2xl border border-emerald-500">
+                  <CheckCircle2 size={32} className="text-emerald-400" />
+                  <span className="text-2xl font-bold text-emerald-300">
+                    三步判断法：相关联 → 同向变化 → 比值一定
+                  </span>
+                </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
