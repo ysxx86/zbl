@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, CheckCircle2, XCircle, GripHorizontal, LockOpen, Lock, Lightbulb, CheckSquare, ChevronDown } from 'lucide-react';
 import { useSoundContext } from '../App';
@@ -99,14 +99,14 @@ export default function Slide4Concept() {
   };
 
   // 自动显示原因（不需要按钮了）
-  useEffect(() => {
-    if (allClassified && !showReasons) {
-      setTimeout(() => {
-        setShowReasons(true);
-        setShowConditionsButton(true);
-      }, 500);
-    }
-  }, [allClassified]);
+  // useEffect(() => {
+  //   if (allClassified && !showReasons) {
+  //     setTimeout(() => {
+  //       setShowReasons(true);
+  //       setShowConditionsButton(true);
+  //     }, 500);
+  //   }
+  // }, [allClassified]);
 
   const unclassifiedItems = items.filter(i => i.zone === 'unclassified');
   const yesItems = items.filter(i => i.zone === 'yes');
@@ -204,8 +204,6 @@ export default function Slide4Concept() {
                 transition={{ delay: 0.3, duration: 0.5 }}
                 className="flex-1 flex flex-col gap-3 overflow-hidden"
               >
-                {/* 拖拽区域 - 固定高度 */}
-                <div className="grid grid-cols-3 gap-3 flex-shrink-0">
                 {/* 拖拽区域 */}
                 <div className="grid grid-cols-3 gap-3 flex-shrink-0">
                   {/* Unclassified Zone */}
@@ -282,6 +280,24 @@ export default function Slide4Concept() {
                         </div>
                       ))}
                     </div>
+                  </motion.div>
+                )}
+                
+                {/* 显示原因按钮 */}
+                {allClassified && !showReasons && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex justify-center flex-shrink-0"
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(250,204,21,0.5)" }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleShowReasons}
+                      className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-full text-lg font-bold shadow-xl border-2 border-yellow-300 cursor-pointer"
+                    >
+                      <Lightbulb size={24} /> 点击查看原因
+                    </motion.button>
                   </motion.div>
                 )}
               </motion.div>

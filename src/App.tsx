@@ -186,7 +186,7 @@ export default function App() {
               ))}
             </div>
 
-            <div className="flex items-center justify-end gap-4 w-1/4">
+            <div className="flex items-center justify-end gap-2 w-1/4">
               <div className="text-right mr-4 hidden lg:block">
                 <p className="text-cyan-400 font-bold text-xl">{slideTitles[currentSlide]}</p>
                 <p className="text-slate-500 text-lg">{currentSlide + 1} / {TOTAL_SLIDES}</p>
@@ -194,62 +194,45 @@ export default function App() {
 
               <button
                 onClick={toggleSound}
-                className="p-4 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
+                className="p-3 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
                 title={soundEnabled ? "关闭音效" : "开启音效"}
               >
-                {soundEnabled ? <Volume2 size={32} /> : <VolumeX size={32} />}
+                {soundEnabled ? <Volume2 size={28} /> : <VolumeX size={28} />}
               </button>
               
-              <div className="w-px h-12 bg-slate-700"></div>
+              <div className="w-px h-10 bg-slate-700"></div>
 
               <button
                 onClick={nextSlide}
                 disabled={currentSlide === TOTAL_SLIDES - 1}
-                className="p-4 rounded-full hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-300"
+                className="p-3 rounded-full hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-300"
                 aria-label="下一页"
               >
-                <ChevronRight size={36} />
+                <ChevronRight size={32} />
               </button>
 
-              <div className="w-px h-12 bg-slate-700"></div>
+              <div className="w-px h-10 bg-slate-700"></div>
 
               <button
                 onClick={toggleFullscreen}
-                className="p-4 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
+                className="p-3 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
                 title={isFullscreen ? "退出全屏" : "全屏模式"}
               >
-                {isFullscreen ? <Minimize size={32} /> : <Maximize size={32} />}
+                {isFullscreen ? <Minimize size={28} /> : <Maximize size={28} />}
+              </button>
+
+              <div className="w-px h-10 bg-slate-700"></div>
+
+              <button
+                onClick={toggleNavbar}
+                className="p-3 rounded-full hover:bg-slate-800 transition-colors text-cyan-400"
+                title={isNavbarCollapsed ? "展开导航栏" : "收起导航栏"}
+              >
+                {isNavbarCollapsed ? <PanelBottomOpen size={28} /> : <PanelBottomClose size={28} />}
               </button>
             </div>
           </div>
         </motion.div>
-
-        {/* 折叠/展开按钮 - 始终显示 */}
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-30">
-          <motion.button
-            onClick={toggleNavbar}
-            className={`flex items-center gap-2 px-6 py-3 rounded-t-2xl transition-all duration-300 ${
-              isNavbarCollapsed 
-                ? 'bg-slate-800 hover:bg-slate-700 text-cyan-400' 
-                : 'bg-slate-900 hover:bg-slate-800 text-slate-400'
-            } shadow-lg`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            title={isNavbarCollapsed ? "展开导航栏" : "收起导航栏"}
-          >
-            {isNavbarCollapsed ? (
-              <>
-                <PanelBottomOpen size={24} />
-                <span className="text-sm font-medium">展开导航</span>
-              </>
-            ) : (
-              <>
-                <PanelBottomClose size={24} />
-                <span className="text-sm font-medium">收起</span>
-              </>
-            )}
-          </motion.button>
-        </div>
       </div>
     </SoundContext.Provider>
   );
