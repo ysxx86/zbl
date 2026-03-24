@@ -133,20 +133,20 @@ export default function Slide4Concept() {
   );
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 p-6 md:p-12 text-slate-100 relative overflow-hidden">
+    <div className="flex flex-col h-full bg-slate-950 p-4 md:p-6 text-slate-100 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none opacity-20" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
 
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 z-10">
-        <h2 className="text-4xl md:text-5xl font-black text-cyan-400 mb-2 flex items-center gap-4 drop-shadow-md">
-          <BookOpen size={48} /> 模块三：揭开"正比例"的神秘面纱
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-3 z-10 flex-shrink-0">
+        <h2 className="text-2xl md:text-3xl font-black text-cyan-400 mb-1 flex items-center gap-3 drop-shadow-md">
+          <BookOpen size={32} /> 模块三：揭开"正比例"的神秘面纱
         </h2>
       </motion.div>
 
-      <div className="flex-1 flex gap-8 max-w-7xl mx-auto w-full z-10">
+      <div className="flex-1 flex gap-4 max-w-7xl mx-auto w-full z-10 overflow-hidden">
         {/* 左侧：概念定义 + 拖拽练习 */}
-        <div className="flex-1 flex flex-col gap-6">
+        <div className="flex-1 flex flex-col gap-3 overflow-hidden">
           {/* Definition Area */}
-          <div className="bg-slate-900/80 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-slate-700 text-center relative overflow-hidden min-h-[180px] flex items-center justify-center">
+          <div className="bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl shadow-2xl border border-slate-700 text-center relative flex items-center justify-center flex-shrink-0">
             <AnimatePresence mode="wait">
               {!showDefinition ? (
                 <motion.button
@@ -157,9 +157,9 @@ export default function Slide4Concept() {
                   whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(34,211,238,0.5)" }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleShowDefinition}
-                  className="flex items-center gap-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-10 py-6 rounded-full text-3xl font-black shadow-2xl border-2 border-cyan-300 cursor-pointer"
+                  className="flex items-center gap-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-4 rounded-full text-xl font-black shadow-2xl border-2 border-cyan-300 cursor-pointer"
                 >
-                  <Lock size={40} /> 点击提取核心规律
+                  <Lock size={28} /> 点击提取核心规律
                 </motion.button>
               ) : (
                 <motion.div
@@ -167,17 +167,17 @@ export default function Slide4Concept() {
                   initial={{ opacity: 0, y: 20, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 0.5, type: "spring" }}
-                  className="text-2xl leading-relaxed text-slate-200 font-medium w-full"
+                  className="text-lg leading-relaxed text-slate-200 font-medium w-full"
                 >
-                  <div className="flex items-center justify-center gap-3 mb-3 text-cyan-400">
-                    <LockOpen size={28} /> <span className="text-xl font-bold tracking-widest">规律已解锁</span>
+                  <div className="flex items-center justify-center gap-2 mb-2 text-cyan-400">
+                    <LockOpen size={20} /> <span className="text-base font-bold tracking-widest">规律已解锁</span>
                   </div>
-                  <p className="mb-3">
-                    两种相关联的量，一种量变化，另一种量也随着变化。<br/>
-                    如果这两种量中相对应的两个数的<strong className="text-cyan-400 text-3xl mx-2">比值一定</strong>，<br/>
+                  <p className="mb-2">
+                    两种相关联的量，一种量变化，另一种量也随着变化。
+                    如果这两种量中相对应的两个数的<strong className="text-cyan-400 text-xl mx-1">比值一定</strong>，
                     这两种量就叫做<strong className="text-cyan-400">成正比例的量</strong>。
                   </p>
-                  <div className="text-3xl font-mono font-black bg-slate-800 text-cyan-300 inline-block px-8 py-3 rounded-2xl tracking-widest shadow-inner border border-slate-600">
+                  <div className="text-xl font-mono font-black bg-slate-800 text-cyan-300 inline-block px-6 py-2 rounded-xl tracking-widest shadow-inner border border-slate-600">
                     y ÷ x = k (一定)
                   </div>
                 </motion.div>
@@ -189,97 +189,100 @@ export default function Slide4Concept() {
           <AnimatePresence>
             {showDefinition && (
               <motion.div 
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                className="flex-1 grid grid-cols-3 gap-4"
+                className="flex-1 flex flex-col gap-3 overflow-hidden"
               >
-                {/* Unclassified Zone */}
-                <div
-                  className="bg-slate-800/50 p-4 rounded-2xl border-2 border-dashed border-slate-600 flex flex-col gap-3"
-                  onDrop={(e) => handleDrop(e, 'unclassified')}
-                  onDragOver={handleDragOver}
-                >
-                  <h3 className="text-xl font-bold text-slate-400 text-center mb-1 flex items-center justify-center gap-2">
-                    <GripHorizontal size={20} /> 待判断
-                  </h3>
-                  {unclassifiedItems.map(item => renderDraggableItem(item))}
-                  {unclassifiedItems.length === 0 && (
-                    <div className="flex-1 flex items-center justify-center text-slate-500 italic text-lg font-bold">完成！🎉</div>
-                  )}
-                </div>
+                {/* 拖拽区域 */}
+                <div className="grid grid-cols-3 gap-3 flex-shrink-0">
+                  {/* Unclassified Zone */}
+                  <div
+                    className="bg-slate-800/50 p-3 rounded-xl border-2 border-dashed border-slate-600 flex flex-col gap-2 min-h-[80px]"
+                    onDrop={(e) => handleDrop(e, 'unclassified')}
+                    onDragOver={handleDragOver}
+                  >
+                    <h3 className="text-base font-bold text-slate-400 text-center flex items-center justify-center gap-1">
+                      <GripHorizontal size={16} /> 待判断
+                    </h3>
+                    {unclassifiedItems.map(item => renderDraggableItem(item))}
+                    {unclassifiedItems.length === 0 && (
+                      <div className="flex-1 flex items-center justify-center text-slate-500 italic text-sm font-bold">完成！🎉</div>
+                    )}
+                  </div>
 
-                {/* 是正比例 */}
-                <div
-                  className="bg-emerald-900/30 p-4 rounded-2xl border-2 border-emerald-700/50 flex flex-col gap-3"
-                  onDrop={(e) => handleDrop(e, 'yes')}
-                  onDragOver={handleDragOver}
-                >
-                  <h3 className="text-xl font-black text-emerald-400 text-center mb-1 flex items-center justify-center gap-2">
-                    <CheckCircle2 size={24} /> 是正比例
-                  </h3>
-                  {yesItems.map(item => renderClassifiedItem(item, item.isProportional))}
-                </div>
+                  {/* 是正比例 */}
+                  <div
+                    className="bg-emerald-900/30 p-3 rounded-xl border-2 border-emerald-700/50 flex flex-col gap-2 min-h-[80px]"
+                    onDrop={(e) => handleDrop(e, 'yes')}
+                    onDragOver={handleDragOver}
+                  >
+                    <h3 className="text-base font-black text-emerald-400 text-center flex items-center justify-center gap-1">
+                      <CheckCircle2 size={18} /> 是正比例
+                    </h3>
+                    {yesItems.map(item => renderClassifiedItem(item, item.isProportional))}
+                  </div>
 
-                {/* 不是正比例 */}
-                <div
-                  className="bg-red-900/30 p-4 rounded-2xl border-2 border-red-700/50 flex flex-col gap-3"
-                  onDrop={(e) => handleDrop(e, 'no')}
-                  onDragOver={handleDragOver}
-                >
-                  <h3 className="text-xl font-black text-red-400 text-center mb-1 flex items-center justify-center gap-2">
-                    <XCircle size={24} /> 不是正比例
-                  </h3>
-                  {noItems.map(item => renderClassifiedItem(item, !item.isProportional))}
+                  {/* 不是正比例 */}
+                  <div
+                    className="bg-red-900/30 p-3 rounded-xl border-2 border-red-700/50 flex flex-col gap-2 min-h-[80px]"
+                    onDrop={(e) => handleDrop(e, 'no')}
+                    onDragOver={handleDragOver}
+                  >
+                    <h3 className="text-base font-black text-red-400 text-center flex items-center justify-center gap-1">
+                      <XCircle size={18} /> 不是正比例
+                    </h3>
+                    {noItems.map(item => renderClassifiedItem(item, !item.isProportional))}
+                  </div>
                 </div>
 
                 {/* 显示原因按钮 */}
                 {allClassified && !showReasons && (
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="col-span-3 flex justify-center"
+                    className="flex justify-center flex-shrink-0"
                   >
                     <motion.button
-                      whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(250,204,21,0.5)" }}
+                      whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(250,204,21,0.5)" }}
                       whileTap={{ scale: 0.95 }}
                       onClick={handleShowReasons}
-                      className="flex items-center gap-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-10 py-5 rounded-full text-2xl font-bold shadow-2xl border-2 border-yellow-300 cursor-pointer"
+                      className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-full text-lg font-bold shadow-xl border-2 border-yellow-300 cursor-pointer"
                     >
-                      <Lightbulb size={32} /> 点击查看原因
+                      <Lightbulb size={24} /> 点击查看原因
                     </motion.button>
                   </motion.div>
                 )}
 
-                {/* 原因列表 */}
+                {/* 原因列表 - 可滚动 */}
                 {showReasons && (
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="col-span-3 bg-slate-900/80 p-4 rounded-2xl border border-slate-700"
+                    className="bg-slate-900/80 p-3 rounded-xl border border-slate-700 flex-shrink-0 max-h-[150px] overflow-y-auto"
                   >
-                    <h4 className="text-xl font-bold text-yellow-400 mb-3 flex items-center gap-2">
-                      <ChevronDown size={24} /> 判断原因
+                    <h4 className="text-base font-bold text-yellow-400 mb-2 flex items-center gap-2">
+                      <ChevronDown size={18} /> 判断原因
                     </h4>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2">
                       {items.map(item => (
                         <div 
                           key={item.id}
-                          className={`p-3 rounded-xl border-2 ${
+                          className={`p-2 rounded-lg border ${
                             item.isProportional 
                               ? 'bg-emerald-900/30 border-emerald-600' 
                               : 'bg-red-900/30 border-red-600'
                           }`}
                         >
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-1 mb-1">
                             {item.isProportional ? (
-                              <CheckCircle2 size={20} className="text-emerald-400" />
+                              <CheckCircle2 size={14} className="text-emerald-400" />
                             ) : (
-                              <XCircle size={20} className="text-red-400" />
+                              <XCircle size={14} className="text-red-400" />
                             )}
-                            <span className="font-bold text-lg">{item.text}</span>
+                            <span className="font-bold text-sm">{item.text}</span>
                           </div>
-                          <p className="text-base text-slate-300 ml-7">{item.reason}</p>
+                          <p className="text-xs text-slate-300 ml-5">{item.reason}</p>
                         </div>
                       ))}
                     </div>
@@ -294,11 +297,11 @@ export default function Slide4Concept() {
         <AnimatePresence>
           {showConditionsButton && (
             <motion.div
-              initial={{ opacity: 0, x: 50, scale: 0.9 }}
+              initial={{ opacity: 0, x: 30, scale: 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 50, scale: 0.9 }}
+              exit={{ opacity: 0, x: 30, scale: 0.9 }}
               transition={{ duration: 0.5 }}
-              className="w-80 flex-shrink-0"
+              className="w-64 flex-shrink-0"
             >
               {!showConditions ? (
                 <motion.div
@@ -310,11 +313,11 @@ export default function Slide4Concept() {
                     whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(250,204,21,0.5)" }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleShowConditions}
-                    className="flex flex-col items-center gap-4 bg-gradient-to-b from-yellow-500 to-orange-500 text-white px-10 py-8 rounded-3xl text-2xl font-bold shadow-2xl border-2 border-yellow-300 cursor-pointer"
+                    className="flex flex-col items-center gap-3 bg-gradient-to-b from-yellow-500 to-orange-500 text-white px-6 py-6 rounded-2xl text-lg font-bold shadow-2xl border-2 border-yellow-300 cursor-pointer"
                   >
-                    <CheckSquare size={48} />
+                    <CheckSquare size={36} />
                     <span>点击查看</span>
-                    <span className="text-lg">判断正比例的三个必要条件</span>
+                    <span className="text-sm">判断正比例的三个必要条件</span>
                   </motion.button>
                 </motion.div>
               ) : (
@@ -322,45 +325,45 @@ export default function Slide4Concept() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5 }}
-                  className="bg-gradient-to-b from-yellow-900/40 to-orange-900/40 backdrop-blur-md p-6 rounded-3xl shadow-2xl border-2 border-yellow-500/50 h-full flex flex-col"
+                  className="bg-gradient-to-b from-yellow-900/40 to-orange-900/40 backdrop-blur-md p-4 rounded-2xl shadow-2xl border-2 border-yellow-500/50 h-full flex flex-col overflow-hidden"
                 >
-                  <h3 className="text-2xl font-black text-yellow-400 mb-4 flex items-center justify-center gap-2">
-                    <CheckSquare size={28} /> 判断正比例的<br/>三个必要条件
+                  <h3 className="text-lg font-black text-yellow-400 mb-2 flex items-center justify-center gap-2">
+                    <CheckSquare size={20} /> 判断正比例的三个必要条件
                   </h3>
                   
-                  <div className="text-lg text-center mb-4 text-yellow-100 font-medium bg-yellow-900/30 p-3 rounded-xl border border-yellow-600/30">
-                    ⚠️ 三个条件<br/><strong className="text-xl text-yellow-300">必须同时成立</strong>
+                  <div className="text-sm text-center mb-2 text-yellow-100 font-medium bg-yellow-900/30 p-2 rounded-lg border border-yellow-600/30">
+                    ⚠️ 三个条件必须<strong className="text-yellow-300">同时成立</strong>
                   </div>
 
-                  <div className="flex flex-col gap-4 flex-1">
+                  <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
                     {conditions.map((condition, index) => (
                       <motion.div
                         key={condition.id}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.15 }}
-                        className="bg-slate-900/80 p-4 rounded-2xl border-2 border-yellow-500/30 text-center"
+                        transition={{ delay: index * 0.1 }}
+                        className="bg-slate-900/80 p-3 rounded-xl border-2 border-yellow-500/30 text-center"
                       >
-                        <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center text-2xl font-black text-slate-900 mx-auto mb-3 shadow-lg">
+                        <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-xl font-black text-slate-900 mx-auto mb-2 shadow-lg">
                           {condition.id}
                         </div>
-                        <h4 className="text-xl font-bold text-yellow-300 mb-2">{condition.title}</h4>
-                        <p className="text-base text-slate-300">{condition.detail}</p>
+                        <h4 className="text-base font-bold text-yellow-300 mb-1">{condition.title}</h4>
+                        <p className="text-sm text-slate-300">{condition.detail}</p>
                       </motion.div>
                     ))}
                   </div>
 
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-4 text-center"
+                    transition={{ delay: 0.4 }}
+                    className="mt-2 text-center flex-shrink-0"
                   >
-                    <div className="bg-emerald-900/50 px-4 py-3 rounded-2xl border border-emerald-500">
-                      <span className="text-lg font-bold text-emerald-300">
+                    <div className="bg-emerald-900/50 px-3 py-2 rounded-xl border border-emerald-500">
+                      <span className="text-sm font-bold text-emerald-300">
                         三步判断法
                       </span>
-                      <div className="text-sm text-emerald-200 mt-1">
+                      <div className="text-xs text-emerald-200 mt-1">
                         相关联 → 同向变化 → 比值一定
                       </div>
                     </div>
