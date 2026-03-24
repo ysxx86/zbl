@@ -98,6 +98,16 @@ export default function Slide4Concept() {
     setShowConditions(true);
   };
 
+  // 自动显示原因（不需要按钮了）
+  useEffect(() => {
+    if (allClassified && !showReasons) {
+      setTimeout(() => {
+        setShowReasons(true);
+        setShowConditionsButton(true);
+      }, 500);
+    }
+  }, [allClassified]);
+
   const unclassifiedItems = items.filter(i => i.zone === 'unclassified');
   const yesItems = items.filter(i => i.zone === 'yes');
   const noItems = items.filter(i => i.zone === 'no');
@@ -194,6 +204,8 @@ export default function Slide4Concept() {
                 transition={{ delay: 0.3, duration: 0.5 }}
                 className="flex-1 flex flex-col gap-3 overflow-hidden"
               >
+                {/* 拖拽区域 - 固定高度 */}
+                <div className="grid grid-cols-3 gap-3 flex-shrink-0">
                 {/* 拖拽区域 */}
                 <div className="grid grid-cols-3 gap-3 flex-shrink-0">
                   {/* Unclassified Zone */}
@@ -236,53 +248,37 @@ export default function Slide4Concept() {
                   </div>
                 </div>
 
-                {/* 显示原因按钮 */}
-                {allClassified && !showReasons && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex justify-center flex-shrink-0"
-                  >
-                    <motion.button
-                      whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(250,204,21,0.5)" }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleShowReasons}
-                      className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-full text-lg font-bold shadow-xl border-2 border-yellow-300 cursor-pointer"
-                    >
-                      <Lightbulb size={24} /> 点击查看原因
-                    </motion.button>
-                  </motion.div>
-                )}
 
-                {/* 原因列表 - 可滚动 */}
+
+                {/* 原因列表 - 紧凑显示 */}
                 {showReasons && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-slate-900/80 p-3 rounded-xl border border-slate-700 flex-shrink-0 max-h-[150px] overflow-y-auto"
+                    className="bg-slate-900/80 p-3 rounded-xl border border-slate-700 flex-shrink-0"
                   >
                     <h4 className="text-base font-bold text-yellow-400 mb-2 flex items-center gap-2">
-                      <ChevronDown size={18} /> 判断原因
+                      <Lightbulb size={18} /> 判断原因
                     </h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2">
                       {items.map(item => (
                         <div 
                           key={item.id}
-                          className={`p-2 rounded-lg border ${
+                          className={`p-2 rounded-lg border flex items-start gap-2 ${
                             item.isProportional 
                               ? 'bg-emerald-900/30 border-emerald-600' 
                               : 'bg-red-900/30 border-red-600'
                           }`}
                         >
-                          <div className="flex items-center gap-1 mb-1">
-                            {item.isProportional ? (
-                              <CheckCircle2 size={14} className="text-emerald-400" />
-                            ) : (
-                              <XCircle size={14} className="text-red-400" />
-                            )}
+                          {item.isProportional ? (
+                            <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0 mt-0.5" />
+                          ) : (
+                            <XCircle size={16} className="text-red-400 flex-shrink-0 mt-0.5" />
+                          )}
+                          <div>
                             <span className="font-bold text-sm">{item.text}</span>
+                            <p className="text-xs text-slate-300 mt-0.5">{item.reason}</p>
                           </div>
-                          <p className="text-xs text-slate-300 ml-5">{item.reason}</p>
                         </div>
                       ))}
                     </div>
@@ -293,83 +289,64 @@ export default function Slide4Concept() {
           </AnimatePresence>
         </div>
 
-        {/* 右侧：显示三个必要条件的按钮 + 三个必要条件 */}
+        {/* 右侧：三个必要条件 */}
         <AnimatePresence>
-          {showConditionsButton && (
+          {showConditionsButton && showConditions && (
             <motion.div
               initial={{ opacity: 0, x: 30, scale: 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 30, scale: 0.9 }}
               transition={{ duration: 0.5 }}
-              className="w-64 flex-shrink-0"
+              className="w-72 flex-shrink-0"
             >
-              {!showConditions ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="h-full flex items-center justify-center"
-                >
-                  <motion.button
-                    whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(250,204,21,0.5)" }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleShowConditions}
-                    className="flex flex-col items-center gap-3 bg-gradient-to-b from-yellow-500 to-orange-500 text-white px-6 py-6 rounded-2xl text-lg font-bold shadow-2xl border-2 border-yellow-300 cursor-pointer"
-                  >
-                    <CheckSquare size={36} />
-                    <span>点击查看</span>
-                    <span className="text-sm">判断正比例的三个必要条件</span>
-                  </motion.button>
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="bg-gradient-to-b from-yellow-900/40 to-orange-900/40 backdrop-blur-md p-4 rounded-2xl shadow-2xl border-2 border-yellow-500/50 h-full flex flex-col overflow-hidden"
-                >
-                  <h3 className="text-lg font-black text-yellow-400 mb-2 flex items-center justify-center gap-2">
-                    <CheckSquare size={20} /> 判断正比例的三个必要条件
-                  </h3>
-                  
-                  <div className="text-sm text-center mb-2 text-yellow-100 font-medium bg-yellow-900/30 p-2 rounded-lg border border-yellow-600/30">
-                    ⚠️ 三个条件必须<strong className="text-yellow-300">同时成立</strong>
-                  </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="bg-gradient-to-b from-yellow-900/40 to-orange-900/40 backdrop-blur-md p-4 rounded-2xl shadow-2xl border-2 border-yellow-500/50 flex flex-col overflow-hidden"
+              >
+                <h3 className="text-lg font-black text-yellow-400 mb-2 flex items-center justify-center gap-2">
+                  <CheckSquare size={20} /> 判断正比例的三个必要条件
+                </h3>
+                
+                <div className="text-sm text-center mb-2 text-yellow-100 font-medium bg-yellow-900/30 p-2 rounded-lg border border-yellow-600/30">
+                  ⚠️ 三个条件必须<strong className="text-yellow-300">同时成立</strong>
+                </div>
 
-                  <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
-                    {conditions.map((condition, index) => (
-                      <motion.div
-                        key={condition.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="bg-slate-900/80 p-3 rounded-xl border-2 border-yellow-500/30 text-center"
-                      >
-                        <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-xl font-black text-slate-900 mx-auto mb-2 shadow-lg">
-                          {condition.id}
-                        </div>
-                        <h4 className="text-base font-bold text-yellow-300 mb-1">{condition.title}</h4>
-                        <p className="text-sm text-slate-300">{condition.detail}</p>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="mt-2 text-center flex-shrink-0"
-                  >
-                    <div className="bg-emerald-900/50 px-3 py-2 rounded-xl border border-emerald-500">
-                      <span className="text-sm font-bold text-emerald-300">
-                        三步判断法
-                      </span>
-                      <div className="text-xs text-emerald-200 mt-1">
-                        相关联 → 同向变化 → 比值一定
+                <div className="flex flex-col gap-2 overflow-y-auto">
+                  {conditions.map((condition, index) => (
+                    <motion.div
+                      key={condition.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="bg-slate-900/80 p-3 rounded-xl border-2 border-yellow-500/30 text-center"
+                    >
+                      <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-xl font-black text-slate-900 mx-auto mb-2 shadow-lg">
+                        {condition.id}
                       </div>
+                      <h4 className="text-base font-bold text-yellow-300 mb-1">{condition.title}</h4>
+                      <p className="text-sm text-slate-300">{condition.detail}</p>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="mt-2 text-center flex-shrink-0"
+                >
+                  <div className="bg-emerald-900/50 px-3 py-2 rounded-xl border border-emerald-500">
+                    <span className="text-sm font-bold text-emerald-300">
+                      三步判断法
+                    </span>
+                    <div className="text-xs text-emerald-200 mt-1">
+                      相关联 → 同向变化 → 比值一定
                     </div>
-                  </motion.div>
+                  </div>
                 </motion.div>
-              )}
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
