@@ -122,15 +122,18 @@ export default function Slide0Warmup({ onNext }: Props) {
                 {[...Array(12)].map((_, i) => (
                   <motion.div
                     key={i}
-                    className="absolute left-1/2 -translate-x-1/2 w-2 h-8 bg-gradient-to-t from-cyan-400 via-blue-500 to-transparent rounded-full blur-sm"
+                    className="absolute left-1/2 w-3 bg-gradient-to-t from-cyan-400 via-blue-500 to-transparent"
                     style={{
-                      bottom: '-20px',
+                      bottom: '-30px',
                       transform: `translateX(-50%) rotate(${-15 + i * 3}deg)`,
                       originY: 0,
+                      width: '4px',
+                      height: '20px',
+                      clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
                     }}
                     animate={{
-                      opacity: [0.8, 0.3, 0.8],
-                      scaleY: [1, 1.5, 1],
+                      opacity: [0.9, 0.4, 0.9],
+                      scaleY: [1, 1.8, 1],
                     }}
                     transition={{
                       duration: 0.3 + i * 0.05,

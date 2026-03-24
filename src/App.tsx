@@ -151,15 +151,21 @@ export default function App() {
         </div>
 
         <motion.div 
-          className="bg-slate-900 border-t border-slate-800 shadow-[0_-4px_15px_rgba(0,0,0,0.5)] z-20 overflow-hidden"
+          className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 shadow-[0_-4px_15px_rgba(0,0,0,0.5)] origin-right z-20"
           animate={{ 
-            height: isNavbarCollapsed ? 0 : 'auto',
-            opacity: isNavbarCollapsed ? 0 : 1
+            translateX: isNavbarCollapsed ? '100%' : 0,
           }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
         >
           <div className="h-24 flex items-center justify-between px-8">
             <div className="flex items-center gap-4 w-1/4">
+              <button
+                onClick={toggleNavbar}
+                className="p-3 rounded-full hover:bg-slate-800 transition-colors text-cyan-400"
+                title={isNavbarCollapsed ? "展开导航栏" : "收起导航栏"}
+              >
+                <ChevronRight size={28} />
+              </button>
               <button
                 onClick={prevSlide}
                 disabled={currentSlide === 0}
@@ -220,19 +226,19 @@ export default function App() {
               >
                 {isFullscreen ? <Minimize size={28} /> : <Maximize size={28} />}
               </button>
-
-              <div className="w-px h-10 bg-slate-700"></div>
-
-              <button
-                onClick={toggleNavbar}
-                className="p-3 rounded-full hover:bg-slate-800 transition-colors text-cyan-400"
-                title={isNavbarCollapsed ? "展开导航栏" : "收起导航栏"}
-              >
-                {isNavbarCollapsed ? <PanelBottomOpen size={28} /> : <PanelBottomClose size={28} />}
-              </button>
             </div>
           </div>
         </motion.div>
+
+        {isNavbarCollapsed && (
+          <button
+            onClick={toggleNavbar}
+            className="fixed right-0 bottom-0 p-4 bg-slate-900 border border-slate-700 rounded-l-xl hover:bg-slate-800 transition-colors text-cyan-400 shadow-lg z-30"
+            title="展开导航栏"
+          >
+            <ChevronLeft size={28} />
+          </button>
+        )}
       </div>
     </SoundContext.Provider>
   );

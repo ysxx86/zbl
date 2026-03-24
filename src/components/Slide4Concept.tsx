@@ -300,14 +300,32 @@ export default function Slide4Concept() {
                     </motion.button>
                   </motion.div>
                 )}
+
+                {/* 显示三个必要条件按钮 */}
+                {showConditionsButton && !showConditions && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex justify-center flex-shrink-0"
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(34,211,238,0.5)" }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleShowConditions}
+                      className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-full text-lg font-bold shadow-xl border-2 border-cyan-300 cursor-pointer"
+                    >
+                      <CheckSquare size={24} /> 点击查看判断正比例的三个必要条件
+                    </motion.button>
+                  </motion.div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* 右侧：三个必要条件 */}
+        {/* 右侧：三个必要条件 - 居中显示 */}
         <AnimatePresence>
-          {showConditionsButton && showConditions && (
+          {showConditions && (
             <motion.div
               initial={{ opacity: 0, x: 30, scale: 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
