@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Maximize, Minimize, ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
+import { Maximize, Minimize, ChevronLeft, ChevronRight, Volume2, VolumeX, PanelBottomClose, PanelBottomOpen } from 'lucide-react';
 
 import Slide0Warmup from './components/Slide0Warmup';
 import Slide1Intro from './components/Slide1Intro';
@@ -49,6 +49,7 @@ export const useSoundContext = () => useContext(SoundContext);
 export default function App() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isNavbarCollapsed, setIsNavbarCollapsed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { play, enabled: soundEnabled, toggle: toggleSound } = useSound();
@@ -92,6 +93,11 @@ export default function App() {
   const goToSlide = useCallback((index: number) => {
     play('click');
     setCurrentSlide(index);
+  }, [play]);
+
+  const toggleNavbar = useCallback(() => {
+    play('click');
+    setIsNavbarCollapsed(prev => !prev);
   }, [play]);
 
   useEffect(() => {
@@ -144,69 +150,105 @@ export default function App() {
           </AnimatePresence>
         </div>
 
-        <div className="h-24 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-8 shadow-[0_-4px_15px_rgba(0,0,0,0.5)] z-20">
-          <div className="flex items-center gap-4 w-1/4">
-            <button
-              onClick={prevSlide}
-              disabled={currentSlide === 0}
-              className="p-4 rounded-full hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-300"
-              aria-label="上一页"
-            >
-              <ChevronLeft size={36} />
-            </button>
-            <span className="text-slate-400 text-xl hidden lg:block">← → 切换页面</span>
-          </div>
-
-          <div className="flex items-center justify-center gap-4 w-1/2">
-            {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
+        <motion.div 
+          className="bg-slate-900 border-t border-slate-800 shadow-[0_-4px_15px_rgba(0,0,0,0.5)] z-20 overflow-hidden"
+          animate={{ 
+            height: isNavbarCollapsed ? 0 : 'auto',
+            opacity: isNavbarCollapsed ? 0 : 1
+          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}>
+        >
+          <div className="h-24 flex items-center justify-between px-8">
+            <div className="flex items-center gap-4 w-1/4">
               <button
-                key={i}
-                onClick={() => goToSlide(i)}
-                className={`h-5 rounded-full transition-all duration-300 ${
-                  currentSlide === i 
-                    ? 'bg-cyan-500 w-16 shadow-[0_0_15px_rgba(34,211,238,0.8)]' 
-                    : 'bg-slate-700 w-5 hover:bg-slate-600'
-                }`}
-                aria-label={`跳转到第 ${i + 1} 页`}
-              />
-            ))}
-          </div>
-
-          <div className="flex items-center justify-end gap-4 w-1/4">
-            <div className="text-right mr-4 hidden lg:block">
-              <p className="text-cyan-400 font-bold text-xl">{slideTitles[currentSlide]}</p>
-              <p className="text-slate-500 text-lg">{currentSlide + 1} / {TOTAL_SLIDES}</p>
+                onClick={prevSlide}
+                disabled={currentSlide === 0}
+                className="p-4 rounded-full hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-300"
+                aria-label="上一页"
+              >
+                <ChevronLeft size={36} />
+              </button>
+              <span className="text-slate-400 text-xl hidden lg:block">← → 切换页面</span>
             </div>
 
-            <button
-              onClick={toggleSound}
-              className="p-4 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
-              title={soundEnabled ? "关闭音效" : "开启音效"}
-            >
-              {soundEnabled ? <Volume2 size={32} /> : <VolumeX size={32} />}
-            </button>
-            
-            <div className="w-px h-12 bg-slate-700"></div>
+            <div className="flex items-center justify-center gap-4 w-1/2">
+              {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goToSlide(i)}
+                  className={`h-5 rounded-full transition-all duration-300 ${
+                    currentSlide === i 
+                      ? 'bg-cyan-500 w-16 shadow-[0_0_15px_rgba(34,211,238,0.8)]' 
+                      : 'bg-slate-700 w-5 hover:bg-slate-600'
+                  }`}
+                  aria-label={`跳转到第 ${i + 1} 页`}
+                />
+              ))}
+            </div>
 
-            <button
-              onClick={nextSlide}
-              disabled={currentSlide === TOTAL_SLIDES - 1}
-              className="p-4 rounded-full hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-300"
-              aria-label="下一页"
-            >
-              <ChevronRight size={36} />
-            </button>
+            <div className="flex items-center justify-end gap-4 w-1/4">
+              <div className="text-right mr-4 hidden lg:block">
+                <p className="text-cyan-400 font-bold text-xl">{slideTitles[currentSlide]}</p>
+                <p className="text-slate-500 text-lg">{currentSlide + 1} / {TOTAL_SLIDES}</p>
+              </div>
 
-            <div className="w-px h-12 bg-slate-700"></div>
+              <button
+                onClick={toggleSound}
+                className="p-4 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
+                title={soundEnabled ? "关闭音效" : "开启音效"}
+              >
+                {soundEnabled ? <Volume2 size={32} /> : <VolumeX size={32} />}
+              </button>
+              
+              <div className="w-px h-12 bg-slate-700"></div>
 
-            <button
-              onClick={toggleFullscreen}
-              className="p-4 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
-              title={isFullscreen ? "退出全屏" : "全屏模式"}
-            >
-              {isFullscreen ? <Minimize size={32} /> : <Maximize size={32} />}
-            </button>
+              <button
+                onClick={nextSlide}
+                disabled={currentSlide === TOTAL_SLIDES - 1}
+                className="p-4 rounded-full hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-300"
+                aria-label="下一页"
+              >
+                <ChevronRight size={36} />
+              </button>
+
+              <div className="w-px h-12 bg-slate-700"></div>
+
+              <button
+                onClick={toggleFullscreen}
+                className="p-4 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
+                title={isFullscreen ? "退出全屏" : "全屏模式"}
+              >
+                {isFullscreen ? <Minimize size={32} /> : <Maximize size={32} />}
+              </button>
+            </div>
           </div>
+        </motion.div>
+
+        {/* 折叠/展开按钮 - 始终显示 */}
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-30">
+          <motion.button
+            onClick={toggleNavbar}
+            className={`flex items-center gap-2 px-6 py-3 rounded-t-2xl transition-all duration-300 ${
+              isNavbarCollapsed 
+                ? 'bg-slate-800 hover:bg-slate-700 text-cyan-400' 
+                : 'bg-slate-900 hover:bg-slate-800 text-slate-400'
+            } shadow-lg`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title={isNavbarCollapsed ? "展开导航栏" : "收起导航栏"}
+          >
+            {isNavbarCollapsed ? (
+              <>
+                <PanelBottomOpen size={24} />
+                <span className="text-sm font-medium">展开导航</span>
+              </>
+            ) : (
+              <>
+                <PanelBottomClose size={24} />
+                <span className="text-sm font-medium">收起</span>
+              </>
+            )}
+          </motion.button>
         </div>
       </div>
     </SoundContext.Provider>
