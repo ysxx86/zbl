@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Maximize, Minimize, ChevronLeft, ChevronRight, Volume2, VolumeX, PanelBottomClose, PanelBottomOpen } from 'lucide-react';
+import { Maximize, Minimize, ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 
 import Slide0Warmup from './components/Slide0Warmup';
 import Slide1Intro from './components/Slide1Intro';
@@ -135,7 +135,7 @@ export default function App() {
         ref={containerRef} 
         className="w-full h-screen bg-slate-950 flex flex-col overflow-hidden font-sans"
       >
-        <div className="flex-1 relative overflow-hidden">
+        <div className="flex-1 relative overflow-hidden pb-24">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -150,21 +150,23 @@ export default function App() {
           </AnimatePresence>
         </div>
 
+        {/* 导航栏 - 收起时往左收，展开时往右展开 */}
         <motion.div 
-          className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 shadow-[0_-4px_15px_rgba(0,0,0,0.5)] origin-right z-20"
+          className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 shadow-[0_-4px_15px_rgba(0,0,0,0.5)] z-20"
           animate={{ 
-            translateX: isNavbarCollapsed ? '100%' : 0,
+            transform: isNavbarCollapsed ? 'translateX(-100%)' : 'translateX(0)',
           }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
         >
           <div className="h-24 flex items-center justify-between px-8">
             <div className="flex items-center gap-4 w-1/4">
+              {/* 收起展开按钮在左边 */}
               <button
                 onClick={toggleNavbar}
                 className="p-3 rounded-full hover:bg-slate-800 transition-colors text-cyan-400"
                 title={isNavbarCollapsed ? "展开导航栏" : "收起导航栏"}
               >
-                <ChevronRight size={28} />
+                <ChevronLeft size={28} />
               </button>
               <button
                 onClick={prevSlide}
@@ -192,7 +194,7 @@ export default function App() {
               ))}
             </div>
 
-            <div className="flex items-center justify-end gap-2 w-1/4">
+            <div className="flex items-center justify-end gap-4 w-1/4">
               <div className="text-right mr-4 hidden lg:block">
                 <p className="text-cyan-400 font-bold text-xl">{slideTitles[currentSlide]}</p>
                 <p className="text-slate-500 text-lg">{currentSlide + 1} / {TOTAL_SLIDES}</p>
@@ -200,43 +202,44 @@ export default function App() {
 
               <button
                 onClick={toggleSound}
-                className="p-3 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
+                className="p-4 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
                 title={soundEnabled ? "关闭音效" : "开启音效"}
               >
-                {soundEnabled ? <Volume2 size={28} /> : <VolumeX size={28} />}
+                {soundEnabled ? <Volume2 size={32} /> : <VolumeX size={32} />}
               </button>
               
-              <div className="w-px h-10 bg-slate-700"></div>
+              <div className="w-px h-12 bg-slate-700"></div>
 
               <button
                 onClick={nextSlide}
                 disabled={currentSlide === TOTAL_SLIDES - 1}
-                className="p-3 rounded-full hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-300"
+                className="p-4 rounded-full hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-300"
                 aria-label="下一页"
               >
-                <ChevronRight size={32} />
+                <ChevronRight size={36} />
               </button>
 
-              <div className="w-px h-10 bg-slate-700"></div>
+              <div className="w-px h-12 bg-slate-700"></div>
 
               <button
                 onClick={toggleFullscreen}
-                className="p-3 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
+                className="p-4 rounded-full hover:bg-slate-800 transition-colors text-slate-300"
                 title={isFullscreen ? "退出全屏" : "全屏模式"}
               >
-                {isFullscreen ? <Minimize size={28} /> : <Maximize size={28} />}
+                {isFullscreen ? <Minimize size={32} /> : <Maximize size={32} />}
               </button>
             </div>
           </div>
         </motion.div>
 
+        {/* 收起状态下，左边的展开按钮 */}
         {isNavbarCollapsed && (
           <button
             onClick={toggleNavbar}
-            className="fixed right-0 bottom-0 p-4 bg-slate-900 border border-slate-700 rounded-l-xl hover:bg-slate-800 transition-colors text-cyan-400 shadow-lg z-30"
+            className="fixed left-0 bottom-0 p-4 bg-slate-900 border border-slate-700 rounded-r-xl hover:bg-slate-800 transition-colors text-cyan-400 shadow-lg z-30"
             title="展开导航栏"
           >
-            <ChevronLeft size={28} />
+            <ChevronRight size={28} />
           </button>
         )}
       </div>

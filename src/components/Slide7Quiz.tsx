@@ -154,7 +154,7 @@ export default function Slide7Quiz() {
     <div className="flex flex-col h-full bg-slate-950 p-6 md:p-12 text-slate-100 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none opacity-20" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
 
-      <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center z-10 gap-6">
+      <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center z-10 gap-4">
         <h2 className="text-4xl md:text-5xl font-black text-purple-400 flex items-center gap-4 drop-shadow-md">
           <HelpCircle size={48} /> 模块六：星际领航员考核
         </h2>
@@ -168,7 +168,7 @@ export default function Slide7Quiz() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center max-w-5xl mx-auto w-full z-10">
+      <div className="flex-1 flex flex-col items-center justify-start max-w-5xl mx-auto w-full z-10 overflow-y-auto pb-32">
         <AnimatePresence mode="wait">
           <motion.div key={currentQ} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="w-full bg-slate-900/90 backdrop-blur-md p-10 md:p-14 rounded-3xl shadow-2xl border-t-8 border-purple-500 border-x border-b border-slate-700">
             
@@ -179,7 +179,7 @@ export default function Slide7Quiz() {
               {renderStars(q.difficulty)}
             </div>
 
-            <h3 className="text-3xl md:text-4xl font-bold text-slate-100 mb-12 leading-relaxed">{q.text}</h3>
+            <h3 className="text-3xl md:text-4xl font-bold text-slate-100 mb-10 leading-relaxed">{q.text}</h3>
             
             {q.type === 'choice' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -205,7 +205,7 @@ export default function Slide7Quiz() {
             )}
 
             {q.type === 'table-choice' && q.tableData && (
-              <div className="flex flex-col items-center gap-10">
+              <div className="flex flex-col items-center gap-8">
                 <table className="w-full max-w-2xl text-center border-collapse text-4xl">
                   <tbody>
                     <tr>
@@ -254,23 +254,18 @@ export default function Slide7Quiz() {
 
             <AnimatePresence>
               {showExplanation && (
-                <motion.div initial={{ opacity: 0, height: 0, marginTop: 0 }} animate={{ opacity: 1, height: 'auto', marginTop: 40 }} className="overflow-hidden">
-                  <div className={clsx("p-8 rounded-3xl text-2xl font-medium shadow-inner border-2", 
+                <motion.div initial={{ opacity: 0, height: 0, marginTop: 0 }} animate={{ opacity: 1, height: 'auto', marginTop: 30 }} className="overflow-hidden">
+                  <div className={clsx("p-6 rounded-3xl text-2xl font-medium shadow-inner border-2", 
                     (q.type === 'choice' && selectedOption === q.options?.find(o => o.isCorrect)?.id) || (q.type === 'fill' && isFillCorrect) || isTableChoiceCorrect
                       ? "bg-emerald-900/30 text-emerald-200 border-emerald-500/50" 
                       : "bg-red-900/30 text-red-200 border-red-500/50"
                   )}>
-                    <p className="mb-4 font-bold text-3xl flex items-center gap-3">
+                    <p className="mb-3 font-bold text-2xl flex items-center gap-3">
                       {(q.type === 'choice' && selectedOption === q.options?.find(o => o.isCorrect)?.id) || (q.type === 'fill' && isFillCorrect) || isTableChoiceCorrect
-                        ? <><CheckCircle2 size={36} className="text-emerald-400"/> 回答正确！获得 {q.points} 积分 🎉</> 
-                        : <><XCircle size={36} className="text-red-400"/> 回答错误！❌</>}
+                        ? <><CheckCircle2 size={32} className="text-emerald-400"/> 回答正确！获得 {q.points} 积分 🎉</> 
+                        : <><XCircle size={32} className="text-red-400"/> 回答错误！❌</>}
                     </p>
                     <p className="leading-relaxed text-slate-300">{q.explanation}</p>
-                  </div>
-                  <div className="mt-10 flex justify-end">
-                    <button onClick={handleNext} className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-10 py-5 rounded-full text-2xl font-bold hover:from-cyan-500 hover:to-blue-500 transition-all shadow-xl flex items-center gap-3 border border-cyan-400">
-                      {currentQ < questions.length - 1 ? "下一题 ➡️" : "查看最终成绩 🏆"}
-                    </button>
                   </div>
                 </motion.div>
               )}
@@ -278,6 +273,22 @@ export default function Slide7Quiz() {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* 下一题按钮固定在右边居中位置 */}
+      <AnimatePresence>
+        {showExplanation && (
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            className="fixed right-8 top-1/2 -translate-y-1/2 z-20"
+          >
+            <button onClick={handleNext} className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-8 py-5 rounded-full text-2xl font-bold hover:from-cyan-500 hover:to-blue-500 transition-all shadow-xl flex items-center gap-3 border border-cyan-400">
+              {currentQ < questions.length - 1 ? "下一题 ➡️" : "查看成绩 🏆"}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
