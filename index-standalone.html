@@ -1,0 +1,1982 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>正比例互动教学课件</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0f172a;
+      color: #f1f5f9;
+      overflow: hidden;
+    }
+    
+    .slide {
+      display: none;
+      width: 100%;
+      height: calc(100vh - 96px);
+      position: relative;
+    }
+    
+    .slide.active {
+      display: flex;
+    }
+    
+    .starfield {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.2;
+      background-image: radial-gradient(circle, #fff 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(-12px) rotate(-2deg); }
+      50% { transform: translateY(12px) rotate(2deg); }
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 30px rgba(34, 211, 238, 0.4); }
+      50% { box-shadow: 0 0 60px rgba(34, 211, 238, 0.8); }
+    }
+    
+    @keyframes flame {
+      0%, 100% { transform: scaleX(1) scaleY(1); opacity: 0.8; }
+      50% { transform: scaleX(1.3) scaleY(1.5); opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes slideOut {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(-50px); }
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes shooting-star {
+      0% { transform: translateX(0) translateY(0) rotate(-45deg) scale(1); opacity: 1; }
+      10% { transform: translateX(-400px) translateY(400px) rotate(-45deg) scale(1); opacity: 1; }
+      100% { transform: translateX(-3000px) translateY(3000px) rotate(-45deg) scale(0); opacity: 0; }
+    }
+    
+    .shooting-star {
+      position: absolute;
+      width: 256px;
+      height: 2px;
+      background: linear-gradient(to right, transparent, white, transparent);
+      opacity: 0;
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.8));
+      animation: shooting-star 4s forwards linear;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(to right, #06b6d4, #3b82f6);
+      color: white;
+      padding: 2rem 4rem;
+      border-radius: 9999px;
+      font-size: 2rem;
+      font-weight: 700;
+      border: 2px solid rgba(34, 211, 238, 0.5);
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 40px rgba(34, 211, 238, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 60px rgba(34, 211, 238, 0.6);
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(to right, #8b5cf6, #a855f7, #ec4899);
+      color: white;
+      padding: 1.5rem 3rem;
+      border-radius: 9999px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 40px rgba(168, 85, 247, 0.4);
+    }
+    
+    .btn-secondary:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 60px rgba(168, 85, 247, 0.6);
+    }
+    
+    .card {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      border-radius: 1.5rem;
+      border: 1px solid #334155;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    
+    .gradient-text {
+      background: linear-gradient(to right, #67e8f9, #c4b5fd, #f9a8d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 24px;
+      background: #334155;
+      border-radius: 9999px;
+      cursor: pointer;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: #06b6d4;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+    }
+    
+    .slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      background: #06b6d4;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+    
+    .drag-item {
+      cursor: grab;
+      user-select: none;
+    }
+    
+    .drag-item:active {
+      cursor: grabbing;
+    }
+    
+    .drop-zone {
+      min-height: 80px;
+      transition: all 0.3s;
+    }
+    
+    .drop-zone.drag-over {
+      background: rgba(34, 211, 238, 0.2);
+      border-color: #22d3ee;
+    }
+    
+    .nav-btn {
+      padding: 1rem;
+      border-radius: 9999px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .nav-btn:hover {
+      background: #1e293b;
+      color: #f1f5f9;
+    }
+    
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    .nav-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 9999px;
+      background: #334155;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .nav-dot.active {
+      width: 64px;
+      background: #22d3ee;
+      box-shadow: 0 0 15px rgba(34, 211, 238, 0.8);
+    }
+    
+    .nav-dot:hover:not(.active) {
+      background: #475569;
+    }
+    
+    .navbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0f172a;
+      border-top: 1px solid #1e293b;
+      box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5);
+      transform-origin: right;
+      transition: transform 0.3s ease-in-out;
+      z-index: 20;
+    }
+    
+    .navbar.collapsed {
+      transform: translateX(100%);
+    }
+    
+    .expand-btn {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      padding: 1rem;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      color: #22d3ee;
+      cursor: pointer;
+      z-index: 30;
+      display: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+    
+    .expand-btn.visible {
+      display: block;
+    }
+    
+    .table-cell {
+      padding: 1rem;
+      border: 2px solid #475569;
+      text-align: center;
+    }
+    
+    .reveal-cell {
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .reveal-cell:hover {
+      background: #334155;
+    }
+    
+    .option-btn {
+      padding: 2rem;
+      border-radius: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      border: 4px solid #475569;
+      background: #1e293b;
+      color: #e2e8f0;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .option-btn:hover:not(:disabled) {
+      background: #334155;
+      border-color: #a855f7;
+    }
+    
+    .option-btn.correct {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+    }
+    
+    .option-btn.wrong {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+    
+    .option-btn:disabled {
+      cursor: not-allowed;
+    }
+    
+    .flame-container {
+      position: relative;
+    }
+    
+    .flame {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 20px;
+      background: linear-gradient(to top, #22d3ee, #3b82f6, transparent);
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      animation: flame 0.3s infinite;
+    }
+    
+    .hidden-content {
+      display: none;
+    }
+    
+    .fade-in {
+      animation: fadeInUp 0.5s ease-out forwards;
+    }
+    
+    .rocket-icon {
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    .hand-bounce {
+      animation: bounce 1s ease-in-out infinite;
+    }
+    
+    @media (max-width: 768px) {
+      .btn-primary {
+        padding: 1.5rem 2rem;
+        font-size: 1.25rem;
+      }
+      
+      .btn-secondary {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="w-full h-screen bg-slate-950 flex flex-col overflow-hidden">
+    <!-- Slides Container -->
+    <div id="slides-container" class="flex-1 relative overflow-hidden">
+      
+      <!-- Slide 0: Warmup -->
+      <div id="slide-0" class="slide active flex-col items-center justify-center p-10 relative overflow-hidden bg-[#030014]">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-indigo-950/40 via-[#030014] to-[#030014]"></div>
+        <div id="stars-0" class="absolute inset-0 pointer-events-none"></div>
+        
+        <div class="relative z-10 w-full max-w-6xl text-center">
+          <div id="step-0-intro" class="block">
+            <div class="mb-8 relative rocket-icon">
+              <div class="absolute inset-0 blur-xl bg-cyan-400/30 rounded-full scale-150"></div>
+              <div id="flame-particles" class="absolute left-1/2 -translate-x-1/2" style="bottom: -30px;"></div>
+              <svg class="w-32 h-32 mx-auto text-cyan-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.8)] relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+              </svg>
+            </div>
+            
+            <h1 class="text-6xl md:text-8xl font-black mb-6 gradient-text drop-shadow-[0_0_30px_rgba(192,132,252,0.5)]">
+              星际旅行计划
+            </h1>
+            
+            <p class="text-3xl md:text-4xl text-indigo-200 mb-12 font-medium">
+              课前互动 · 5分钟
+            </p>
+            
+            <button onclick="startWarmup()" class="btn-primary">
+              开始探索 🚀
+            </button>
+          </div>
+          
+          <div id="step-1-guessing" class="hidden">
+            <h2 class="text-5xl md:text-6xl font-black text-cyan-400 mb-6">🛸 速度大猜想</h2>
+            <div class="card p-8 inline-block mb-10">
+              <p class="text-3xl text-slate-300 mb-4">我们的飞船速度：</p>
+              <p class="text-6xl font-black text-yellow-400">10 万千米/小时</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+              <div class="card p-8 cursor-pointer hover:border-cyan-500 transition-all" onclick="revealDestination(0)">
+                <div class="text-7xl mb-4">🌙</div>
+                <h3 class="text-4xl font-bold text-white mb-4">月球</h3>
+                <div class="bg-slate-700/50 rounded-2xl p-4 mb-4">
+                  <p class="text-2xl text-slate-400 mb-2">距离</p>
+                  <p class="text-4xl font-bold text-cyan-400">38 万km</p>
+                </div>
+                <div id="dest-0" class="bg-slate-700/50 rounded-2xl p-6">
+                  <p class="text-2xl text-slate-400">🤔 猜猜需要多少小时？</p>
+                  <p class="text-lg text-cyan-400 mt-2">点击揭示答案</p>
+                </div>
+              </div>
+              
+              <div class="card p-8 cursor-pointer hover:border-cyan-500 transition-all" onclick="revealDestination(1)">
+                <div class="text-7xl mb-4">🔴</div>
+                <h3 class="text-4xl font-bold text-white mb-4">火星</h3>
+                <div class="bg-slate-700/50 rounded-2xl p-4 mb-4">
+                  <p class="text-2xl text-slate-400 mb-2">距离</p>
+                  <p class="text-4xl font-bold text-cyan-400">5,500 万km</p>
+                </div>
+                <div id="dest-1" class="bg-slate-700/50 rounded-2xl p-6">
+                  <p class="text-2xl text-slate-400">🤔 猜猜需要多少小时？</p>
+                  <p class="text-lg text-cyan-400 mt-2">点击揭示答案</p>
+                </div>
+              </div>
+              
+              <div class="card p-8 cursor-pointer hover:border-cyan-500 transition-all" onclick="revealDestination(2)">
+                <div class="text-7xl mb-4">🟠</div>
+                <h3 class="text-4xl font-bold text-white mb-4">木星</h3>
+                <div class="bg-slate-700/50 rounded-2xl p-4 mb-4">
+                  <p class="text-2xl text-slate-400 mb-2">距离</p>
+                  <p class="text-4xl font-bold text-cyan-400">63,000 万km</p>
+                </div>
+                <div id="dest-2" class="bg-slate-700/50 rounded-2xl p-6">
+                  <p class="text-2xl text-slate-400">🤔 猜猜需要多少小时？</p>
+                  <p class="text-lg text-cyan-400 mt-2">点击揭示答案</p>
+                </div>
+              </div>
+            </div>
+            
+            <button id="show-summary-btn" class="btn-secondary hidden" onclick="showSummary()">
+              发现规律 ✨
+            </button>
+          </div>
+          
+          <div id="step-2-summary" class="hidden">
+            <h2 class="text-5xl md:text-6xl font-black text-purple-400 mb-8 flex items-center justify-center gap-4">
+              <svg class="w-14 h-14 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                <path d="M9 18h6"/>
+                <path d="M10 22h4"/>
+              </svg>
+              发现规律！
+            </h2>
+            
+            <div class="card p-8 mb-8">
+              <table class="w-full text-center">
+                <thead>
+                  <tr class="border-b-2 border-slate-600">
+                    <th class="p-4 text-2xl text-cyan-400">目的地</th>
+                    <th class="p-4 text-2xl text-cyan-400">距离 (万km)</th>
+                    <th class="p-4 text-2xl text-cyan-400">时间 (小时)</th>
+                    <th class="p-4 text-2xl text-emerald-400">距离 ÷ 时间</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-b border-slate-700">
+                    <td class="p-4 text-2xl font-bold">🌙 月球</td>
+                    <td class="p-4 text-2xl text-yellow-400">38</td>
+                    <td class="p-4 text-2xl text-cyan-300">3.8</td>
+                    <td class="p-4 text-3xl font-black text-emerald-400">10</td>
+                  </tr>
+                  <tr class="border-b border-slate-700">
+                    <td class="p-4 text-2xl font-bold">🔴 火星</td>
+                    <td class="p-4 text-2xl text-yellow-400">5,500</td>
+                    <td class="p-4 text-2xl text-cyan-300">550</td>
+                    <td class="p-4 text-3xl font-black text-emerald-400">10</td>
+                  </tr>
+                  <tr>
+                    <td class="p-4 text-2xl font-bold">🟠 木星</td>
+                    <td class="p-4 text-2xl text-yellow-400">63,000</td>
+                    <td class="p-4 text-2xl text-cyan-300">6,300</td>
+                    <td class="p-4 text-3xl font-black text-emerald-400">10</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="bg-gradient-to-r from-emerald-900/50 to-teal-900/50 rounded-3xl p-8 mb-10 border border-emerald-500/50">
+              <p class="text-3xl text-emerald-100 font-medium leading-relaxed">
+                💡 无论去哪里，<strong class="text-4xl text-yellow-400 mx-2">距离 ÷ 时间 = 10</strong>
+                <br/>
+                <span class="text-2xl text-emerald-300">速度不变，距离越远，时间越长！</span>
+              </p>
+            </div>
+            
+            <p class="text-2xl text-slate-300 mb-6">
+              距离和时间之间有神奇的关系，让我们深入探索！
+            </p>
+            
+            <button onclick="goToSlide(1)" class="btn-primary flex items-center gap-4 mx-auto">
+              <span class="text-4xl">🚀</span>
+              启动飞船，开始探索！
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Slide 1: Intro -->
+      <div id="slide-1" class="slide flex-col items-center justify-center p-10 relative overflow-hidden bg-[#030014]">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-indigo-950/40 via-[#030014] to-[#030014]"></div>
+        <div id="stars-1" class="absolute inset-0 pointer-events-none"></div>
+        <div id="planets-1" class="absolute inset-0 pointer-events-none"></div>
+        
+        <div id="intro-content" class="relative z-10 text-center max-w-4xl">
+          <h1 class="text-6xl md:text-8xl font-black mb-8 gradient-text">
+            宇宙探索：正比例的奥秘
+          </h1>
+          
+          <p class="text-2xl md:text-3xl text-indigo-100 mb-16 leading-relaxed font-medium">
+            准备好踏上这场浪漫的星际之旅了吗？<br/>
+            今天，我们将驾驶宇宙飞船，穿越<strong class="text-fuchsia-300 mx-2">银河系</strong>，<br/>
+            揭开数学中"变与不变"的终极秘密！
+          </p>
+          
+          <button onclick="goToSlide(2)" class="btn-secondary flex items-center gap-4 mx-auto">
+            <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polygon points="10 8 16 12 10 16 10 8"/>
+            </svg>
+            启动飞船，驶向星辰！
+          </button>
+        </div>
+      </div>
+      
+      <!-- Slide 2: Scenario -->
+      <div id="slide-2" class="slide flex-col p-6 md:p-12 relative overflow-hidden">
+        <div class="starfield"></div>
+        
+        <div class="mb-10 z-10">
+          <h2 class="text-4xl md:text-5xl font-black text-cyan-400 mb-4 flex items-center gap-4">
+            <svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+              <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+            </svg>
+            模块一：星际航行中的变化
+          </h2>
+          <p class="text-2xl md:text-3xl text-slate-300 font-medium leading-relaxed">
+            "星际探索号"飞船正以 <strong class="text-yellow-400 text-4xl mx-2">2 万千米/小时</strong> 的恒定速度驶向火星。<br/>
+            拖动滑块改变飞行时间，观察飞行距离的变化，并记录数据！
+          </p>
+        </div>
+        
+        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-10 max-w-7xl mx-auto w-full z-10">
+          <div class="card p-10 flex flex-col items-center justify-center gap-10">
+            <div class="w-full text-center bg-slate-800 p-8 rounded-2xl border border-slate-700">
+              <div class="text-3xl font-bold mb-6 flex items-center justify-center gap-3 text-cyan-300">
+                <svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                飞行时间: <span id="hours-display" class="text-white text-5xl mx-2">1</span> 小时
+              </div>
+              <input type="range" min="1" max="10" value="1" class="slider" id="hours-slider" oninput="updateHours(this.value)">
+            </div>
+            
+            <div class="relative w-full h-32 bg-slate-950 rounded-full border-2 border-slate-800 overflow-hidden flex items-center">
+              <div id="rocket-track" class="absolute flex items-center justify-center" style="left: 10%; top: 50%; transform: translateY(-50%);">
+                <div class="text-6xl drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]" style="transform: rotate(45deg);">🚀</div>
+              </div>
+            </div>
+            
+            <div class="text-4xl font-bold bg-gradient-to-r from-blue-900 to-indigo-900 px-10 py-6 rounded-2xl text-blue-100 border border-blue-700 flex items-center gap-4 w-full justify-center">
+              <svg class="w-10 h-10 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="3 6 6 3 18 3 21 6 21 18 18 21 6 21 3 18"/>
+                <line x1="3" y1="6" x2="21" y2="18"/>
+                <line x1="21" y1="6" x2="3" y2="18"/>
+              </svg>
+              飞行距离: <span id="distance-display" class="text-yellow-400 text-6xl mx-2">2</span> 万千米
+            </div>
+            
+            <button onclick="recordData()" class="flex items-center justify-center gap-3 bg-cyan-600 text-white px-10 py-5 rounded-full text-3xl font-bold shadow-xl hover:bg-cyan-500 transition-colors w-full">
+              <svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              记录当前航行数据
+            </button>
+          </div>
+          
+          <div class="card p-10 flex flex-col">
+            <h3 class="text-3xl font-black text-cyan-400 mb-8 border-b-2 border-slate-700 pb-6 flex items-center gap-3">
+              📝 航行日志 (数据表)
+            </h3>
+            
+            <div id="records-list" class="flex-1 flex items-center justify-center text-slate-500 text-2xl border-2 border-dashed border-slate-700 rounded-2xl bg-slate-800/50">
+              点击左侧"记录当前航行数据"按钮添加记录
+            </div>
+            
+            <div id="records-hint" class="hidden mt-8 bg-gradient-to-r from-emerald-900 to-teal-900 text-emerald-100 p-6 rounded-2xl font-bold text-center text-2xl border border-emerald-700">
+              💡 观察航行日志，你发现"时间"和"距离"是怎么变化的吗？<br/>
+              （按键盘 <kbd class="bg-slate-800 px-3 py-1 rounded-md shadow-sm text-xl border border-slate-600 mx-2">➡️</kbd> 进入下一模块探究）
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Slide 3: Table -->
+      <div id="slide-3" class="slide flex-col p-6 md:p-8 relative overflow-hidden">
+        <div class="starfield"></div>
+        
+        <div class="mb-4 z-10 flex-shrink-0">
+          <h2 class="text-3xl md:text-4xl font-black text-cyan-400 mb-2 flex items-center gap-4">
+            <svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 3v18"/>
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+              <path d="M3 9h18"/>
+              <path d="M3 15h18"/>
+            </svg>
+            模块二：寻找不变的秘密
+          </h2>
+          <p class="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed">
+            基于上一模块的航行日志，我们来看看"飞行距离"和"飞行时间"之间有什么隐藏的规律。
+            <strong class="text-yellow-400 ml-2">点击表格的每一列，看看会发生什么！</strong>
+          </p>
+        </div>
+        
+        <div class="flex-1 flex flex-col items-center justify-start max-w-6xl mx-auto w-full z-10 overflow-y-auto">
+          <div class="w-full card p-6 md:p-8 overflow-x-auto flex-shrink-0">
+            <table class="w-full text-center border-collapse text-2xl md:text-3xl">
+              <tbody>
+                <tr class="bg-slate-800/50">
+                  <th class="table-cell text-cyan-300 font-bold w-1/4 whitespace-nowrap">时间 (小时)</th>
+                  <td class="table-cell font-medium text-slate-200">1</td>
+                  <td class="table-cell font-medium text-slate-200">2</td>
+                  <td class="table-cell font-medium text-slate-200">3</td>
+                  <td class="table-cell font-medium text-slate-200">4</td>
+                  <td class="table-cell font-medium text-slate-200">5</td>
+                </tr>
+                <tr class="bg-slate-800/50">
+                  <th class="table-cell text-yellow-400 font-bold w-1/4 whitespace-nowrap">距离 (万千米)</th>
+                  <td class="table-cell font-medium text-yellow-300">2</td>
+                  <td class="table-cell font-medium text-yellow-300">4</td>
+                  <td class="table-cell font-medium text-yellow-300">6</td>
+                  <td class="table-cell font-medium text-yellow-300">8</td>
+                  <td class="table-cell font-medium text-yellow-300">10</td>
+                </tr>
+                <tr>
+                  <th class="table-cell text-emerald-400 font-bold bg-emerald-900/30 w-1/4 whitespace-nowrap">距离 ÷ 时间</th>
+                  <td class="table-cell reveal-cell" onclick="revealRatio(0, 2, 1)">
+                    <span class="ratio-content hand-bounce text-cyan-400">👆 点击</span>
+                  </td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio(1, 4, 2)">
+                    <span class="ratio-content hand-bounce text-cyan-400">👆 点击</span>
+                  </td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio(2, 6, 3)">
+                    <span class="ratio-content hand-bounce text-cyan-400">👆 点击</span>
+                  </td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio(3, 8, 4)">
+                    <span class="ratio-content hand-bounce text-cyan-400">👆 点击</span>
+                  </td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio(4, 10, 5)">
+                    <span class="ratio-content hand-bounce text-cyan-400">👆 点击</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div id="table-conclusion" class="hidden bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-6 rounded-2xl shadow-lg max-w-4xl text-center w-full border border-emerald-400 mt-4 flex-shrink-0">
+            <h3 class="text-2xl font-black mb-4 flex items-center justify-center gap-3">
+              <svg class="w-8 h-8 text-yellow-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                <path d="M9 18h6"/>
+                <path d="M10 22h4"/>
+              </svg>
+              惊人的发现！
+            </h3>
+            <p class="text-xl leading-relaxed font-medium">
+              无论飞行时间和距离怎么变化，它们的<strong class="text-yellow-300 mx-2 text-3xl">比值（商）始终是 2</strong>！<br/>
+              这个不变的比值，其实就是飞船的<strong class="text-yellow-300 mx-2 text-2xl">飞行速度</strong>。
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Slide 4: Concept -->
+      <div id="slide-4" class="slide flex-col p-4 md:p-6 relative overflow-hidden">
+        <div class="starfield"></div>
+        
+        <div class="mb-3 z-10 flex-shrink-0">
+          <h2 class="text-2xl md:text-3xl font-black text-cyan-400 mb-1 flex items-center gap-3">
+            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+            </svg>
+            模块三：揭开"正比例"的神秘面纱
+          </h2>
+        </div>
+        
+        <div class="flex-1 flex gap-4 max-w-7xl mx-auto w-full z-10 overflow-hidden">
+          <div class="flex-1 flex flex-col gap-3 overflow-hidden">
+            <div class="card p-4 text-center relative flex items-center justify-center flex-shrink-0">
+              <button id="unlock-btn" onclick="showDefinition()" class="flex items-center gap-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-4 rounded-full text-xl font-black shadow-2xl border-2 border-cyan-300 cursor-pointer hover:scale-105 transition-transform">
+                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                点击提取核心规律
+              </button>
+              <div id="definition-content" class="hidden text-lg leading-relaxed text-slate-200 font-medium w-full">
+                <div class="flex items-center justify-center gap-2 mb-2 text-cyan-400">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                  </svg>
+                  <span class="text-base font-bold tracking-widest">规律已解锁</span>
+                </div>
+                <p class="mb-2">
+                  两种相关联的量，一种量变化，另一种量也随着变化。
+                  如果这两种量中相对应的两个数的<strong class="text-cyan-400 text-xl mx-1">比值一定</strong>，
+                  这两种量就叫做<strong class="text-cyan-400">成正比例的量</strong>。
+                </p>
+                <div class="text-xl font-mono font-black bg-slate-800 text-cyan-300 inline-block px-6 py-2 rounded-xl tracking-widest border border-slate-600">
+                  y ÷ x = k (一定)
+                </div>
+              </div>
+            </div>
+            
+            <div id="drag-game" class="hidden flex-1 flex flex-col gap-3 overflow-hidden">
+              <div class="grid grid-cols-3 gap-3 flex-shrink-0">
+                <div id="unclassified-zone" class="drop-zone bg-slate-800/50 p-3 rounded-xl border-2 border-dashed border-slate-600 flex flex-col gap-2 min-h-[80px]" ondrop="handleDrop(event, 'unclassified')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                  <h3 class="text-base font-bold text-slate-400 text-center flex items-center justify-center gap-1">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="9" cy="5" r="1"/>
+                      <circle cx="9" cy="12" r="1"/>
+                      <circle cx="9" cy="19" r="1"/>
+                      <circle cx="15" cy="5" r="1"/>
+                      <circle cx="15" cy="12" r="1"/>
+                      <circle cx="15" cy="19" r="1"/>
+                    </svg>
+                    待判断
+                  </h3>
+                </div>
+                
+                <div id="yes-zone" class="drop-zone bg-emerald-900/30 p-3 rounded-xl border-2 border-emerald-700/50 flex flex-col gap-2 min-h-[80px]" ondrop="handleDrop(event, 'yes')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                  <h3 class="text-base font-black text-emerald-400 text-center flex items-center justify-center gap-1">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    是正比例
+                  </h3>
+                </div>
+                
+                <div id="no-zone" class="drop-zone bg-red-900/30 p-3 rounded-xl border-2 border-red-700/50 flex flex-col gap-2 min-h-[80px]" ondrop="handleDrop(event, 'no')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                  <h3 class="text-base font-black text-red-400 text-center flex items-center justify-center gap-1">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                    不是正比例
+                  </h3>
+                </div>
+              </div>
+              
+              <div id="reasons-section" class="hidden bg-slate-900/80 p-3 rounded-xl border border-slate-700 flex-shrink-0">
+                <h4 class="text-base font-bold text-yellow-400 mb-2 flex items-center gap-2">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                    <path d="M9 18h6"/>
+                    <path d="M10 22h4"/>
+                  </svg>
+                  判断原因
+                </h4>
+                <div id="reasons-list" class="space-y-2"></div>
+              </div>
+              
+              <button id="show-reasons-btn" class="hidden flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-full text-lg font-bold shadow-xl border-2 border-yellow-300 cursor-pointer mx-auto hover:scale-105 transition-transform" onclick="showReasons()">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                  <path d="M9 18h6"/>
+                  <path d="M10 22h4"/>
+                </svg>
+                点击查看原因
+              </button>
+              
+              <button id="show-conditions-btn" class="hidden flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-full text-lg font-bold shadow-xl border-2 border-cyan-300 cursor-pointer mx-auto hover:scale-105 transition-transform" onclick="showConditions()">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="18" height="18" x="3" y="3" rx="2"/>
+                  <path d="m9 12 2 2 4-4"/>
+                </svg>
+                点击查看判断正比例的三个必要条件
+              </button>
+            </div>
+          </div>
+          
+          <div id="conditions-panel" class="hidden w-72 flex-shrink-0">
+            <div class="bg-gradient-to-b from-yellow-900/40 to-orange-900/40 backdrop-blur-md p-4 rounded-2xl shadow-2xl border-2 border-yellow-500/50 flex flex-col overflow-hidden">
+              <h3 class="text-lg font-black text-yellow-400 mb-2 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="18" height="18" x="3" y="3" rx="2"/>
+                  <path d="m9 12 2 2 4-4"/>
+                </svg>
+                判断正比例的三个必要条件
+              </h3>
+              
+              <div class="text-sm text-center mb-2 text-yellow-100 font-medium bg-yellow-900/30 p-2 rounded-lg border border-yellow-600/30">
+                ⚠️ 三个条件必须<strong class="text-yellow-300">同时成立</strong>
+              </div>
+              
+              <div class="flex flex-col gap-2 overflow-y-auto">
+                <div class="bg-slate-900/80 p-3 rounded-xl border-2 border-yellow-500/30 text-center">
+                  <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-xl font-black text-slate-900 mx-auto mb-2 shadow-lg">1</div>
+                  <h4 class="text-base font-bold text-yellow-300 mb-1">相关联</h4>
+                  <p class="text-sm text-slate-300">一种量变化，另一种量也随着变化</p>
+                </div>
+                <div class="bg-slate-900/80 p-3 rounded-xl border-2 border-yellow-500/30 text-center">
+                  <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-xl font-black text-slate-900 mx-auto mb-2 shadow-lg">2</div>
+                  <h4 class="text-base font-bold text-yellow-300 mb-1">同向变化</h4>
+                  <p class="text-sm text-slate-300">一种量增加，另一种量也增加</p>
+                </div>
+                <div class="bg-slate-900/80 p-3 rounded-xl border-2 border-yellow-500/30 text-center">
+                  <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-xl font-black text-slate-900 mx-auto mb-2 shadow-lg">3</div>
+                  <h4 class="text-base font-bold text-yellow-300 mb-1">比值一定</h4>
+                  <p class="text-sm text-slate-300">相对应的两个数的比值是固定的常数</p>
+                </div>
+              </div>
+              
+              <div class="mt-2 text-center flex-shrink-0">
+                <div class="bg-emerald-900/50 px-3 py-2 rounded-xl border border-emerald-500">
+                  <span class="text-sm font-bold text-emerald-300">三步判断法</span>
+                  <div class="text-xs text-emerald-200 mt-1">相关联 → 同向变化 → 比值一定</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Slide 5: Square Perimeter -->
+      <div id="slide-5" class="slide flex-col p-6 md:p-12 relative overflow-hidden">
+        <div class="starfield"></div>
+        
+        <div class="mb-10 z-10">
+          <h2 class="text-4xl md:text-5xl font-black text-cyan-400 mb-4 flex items-center gap-4">
+            <svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+            </svg>
+            模块四：空间站的太阳能板
+          </h2>
+          <p class="text-2xl md:text-3xl text-slate-300 font-medium leading-relaxed">
+            现在我们用刚学的正比例知识来看看，为了给空间站供电，我们需要展开正方形的太阳能板。<br/>
+            拖动滑块改变<strong class="text-cyan-400 mx-2">边长</strong>，观察<strong class="text-yellow-400 mx-2">周长</strong>的变化，看看它们是否成正比例？
+          </p>
+        </div>
+        
+        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-10 max-w-7xl mx-auto w-full z-10">
+          <div class="card p-10 flex flex-col items-center justify-center gap-10">
+            <div class="w-full text-center bg-slate-800 p-8 rounded-2xl border border-slate-700">
+              <div class="text-3xl font-bold mb-6 flex items-center justify-center gap-3 text-cyan-300">
+                边长: <span id="side-display-5" class="text-white text-5xl mx-2">1</span> 米
+              </div>
+              <input type="range" min="1" max="5" value="1" class="slider" id="side-slider-5" oninput="updateSide5(this.value)">
+            </div>
+            
+            <div class="relative w-full h-64 bg-slate-950 rounded-2xl border-2 border-slate-800 flex items-center justify-center overflow-hidden">
+              <div id="square-5" class="bg-cyan-500/20 border-4 border-cyan-400 flex items-center justify-center relative transition-all duration-300" style="width: 40px; height: 40px; box-shadow: 0 0 30px rgba(34,211,238,0.3);">
+                <span class="absolute -top-8 text-cyan-300 font-bold text-xl" id="side-label-5-top">1m</span>
+                <span class="absolute -right-10 text-cyan-300 font-bold text-xl" id="side-label-5-right">1m</span>
+                <span class="text-2xl font-black text-cyan-200 whitespace-nowrap" id="perimeter-display-5">周长: 4m</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card p-8 flex flex-col justify-center">
+            <table class="w-full text-center border-collapse text-2xl md:text-3xl">
+              <tbody>
+                <tr class="bg-slate-800/50">
+                  <th class="table-cell text-cyan-300 font-bold w-2/5 whitespace-nowrap">边长 (m)</th>
+                  <td class="table-cell font-medium text-slate-200">1</td>
+                  <td class="table-cell font-medium text-slate-200">2</td>
+                  <td class="table-cell font-medium text-slate-200">3</td>
+                  <td class="table-cell font-medium text-slate-200">4</td>
+                  <td class="table-cell font-medium text-slate-200">5</td>
+                </tr>
+                <tr class="bg-slate-800/50">
+                  <th class="table-cell text-yellow-400 font-bold w-2/5 whitespace-nowrap">周长 (m)</th>
+                  <td class="table-cell font-medium text-yellow-300">4</td>
+                  <td class="table-cell font-medium text-yellow-300">8</td>
+                  <td class="table-cell font-medium text-yellow-300">12</td>
+                  <td class="table-cell font-medium text-yellow-300">16</td>
+                  <td class="table-cell font-medium text-yellow-300">20</td>
+                </tr>
+                <tr>
+                  <th class="table-cell text-emerald-400 font-bold bg-emerald-900/30 w-2/5 whitespace-nowrap">周长 ÷ 边长</th>
+                  <td class="table-cell reveal-cell" onclick="revealRatio5(0, 4, 1)"><span class="ratio5-content hand-bounce text-cyan-400">👆</span></td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio5(1, 8, 2)"><span class="ratio5-content hand-bounce text-cyan-400">👆</span></td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio5(2, 12, 3)"><span class="ratio5-content hand-bounce text-cyan-400">👆</span></td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio5(3, 16, 4)"><span class="ratio5-content hand-bounce text-cyan-400">👆</span></td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio5(4, 20, 5)"><span class="ratio5-content hand-bounce text-cyan-400">👆</span></td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div id="conclusion-5" class="hidden mt-8 bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-6 rounded-2xl border border-emerald-400 text-center">
+              <h3 class="text-2xl font-black mb-2 flex items-center justify-center gap-2">
+                <svg class="w-8 h-8 text-yellow-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                  <path d="M9 18h6"/>
+                  <path d="M10 22h4"/>
+                </svg>
+                又一个不变的规律！
+              </h3>
+              <p class="text-xl font-medium">
+                正方形的周长和边长的比值始终是 <strong class="text-yellow-300 text-3xl mx-2">4</strong>。<br/>
+                （因为正方形有4条相等的边）
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Slide 6: Square Area -->
+      <div id="slide-6" class="slide flex-col p-6 md:p-12 relative overflow-hidden">
+        <div class="starfield"></div>
+        
+        <div class="mb-10 z-10">
+          <h2 class="text-4xl md:text-5xl font-black text-purple-400 mb-4 flex items-center gap-4">
+            <svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+            </svg>
+            模块四 (进阶)：太阳能板的面积
+          </h2>
+          <p class="text-2xl md:text-3xl text-slate-300 font-medium leading-relaxed">
+            刚才我们验证了周长和边长成正比例，现在来看看太阳能板的<strong class="text-purple-400 mx-2">面积</strong>。<br/>
+            拖动滑块改变<strong class="text-cyan-400 mx-2">边长</strong>，观察<strong class="text-purple-400 mx-2">面积</strong>的变化，看看它们成正比例吗？
+          </p>
+        </div>
+        
+        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-10 max-w-7xl mx-auto w-full z-10">
+          <div class="card p-10 flex flex-col items-center justify-center gap-10">
+            <div class="w-full text-center bg-slate-800 p-8 rounded-2xl border border-slate-700">
+              <div class="text-3xl font-bold mb-6 flex items-center justify-center gap-3 text-cyan-300">
+                边长: <span id="side-display-6" class="text-white text-5xl mx-2">1</span> 米
+              </div>
+              <input type="range" min="1" max="5" value="1" class="slider" id="side-slider-6" oninput="updateSide6(this.value)">
+            </div>
+            
+            <div class="relative w-full h-64 bg-slate-950 rounded-2xl border-2 border-slate-800 flex items-center justify-center overflow-hidden">
+              <div id="square-6" class="bg-purple-500/20 border-4 border-purple-400 flex items-center justify-center relative transition-all duration-300" style="width: 40px; height: 40px; box-shadow: 0 0 30px rgba(192,132,252,0.3);">
+                <span class="absolute -top-8 text-cyan-300 font-bold text-xl" id="side-label-6-top">1m</span>
+                <span class="absolute -right-10 text-cyan-300 font-bold text-xl" id="side-label-6-right">1m</span>
+                <span class="text-2xl font-black text-purple-200 whitespace-nowrap" id="area-display-6">面积: 1m²</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card p-8 flex flex-col justify-center">
+            <table class="w-full text-center border-collapse text-2xl md:text-3xl">
+              <tbody>
+                <tr class="bg-slate-800/50">
+                  <th class="table-cell text-cyan-300 font-bold w-2/5 whitespace-nowrap">边长 (m)</th>
+                  <td class="table-cell font-medium text-slate-200">1</td>
+                  <td class="table-cell font-medium text-slate-200">2</td>
+                  <td class="table-cell font-medium text-slate-200">3</td>
+                  <td class="table-cell font-medium text-slate-200">4</td>
+                  <td class="table-cell font-medium text-slate-200">5</td>
+                </tr>
+                <tr class="bg-slate-800/50">
+                  <th class="table-cell text-purple-400 font-bold w-2/5 whitespace-nowrap">面积 (m²)</th>
+                  <td class="table-cell font-medium text-purple-300">1</td>
+                  <td class="table-cell font-medium text-purple-300">4</td>
+                  <td class="table-cell font-medium text-purple-300">9</td>
+                  <td class="table-cell font-medium text-purple-300">16</td>
+                  <td class="table-cell font-medium text-purple-300">25</td>
+                </tr>
+                <tr>
+                  <th class="table-cell text-red-400 font-bold bg-red-900/30 w-2/5 whitespace-nowrap">面积 ÷ 边长</th>
+                  <td class="table-cell reveal-cell" onclick="revealRatio6(0, 1, 1)"><span class="ratio6-content hand-bounce text-cyan-400">👆</span></td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio6(1, 4, 2)"><span class="ratio6-content hand-bounce text-cyan-400">👆</span></td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio6(2, 9, 3)"><span class="ratio6-content hand-bounce text-cyan-400">👆</span></td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio6(3, 16, 4)"><span class="ratio6-content hand-bounce text-cyan-400">👆</span></td>
+                  <td class="table-cell reveal-cell" onclick="revealRatio6(4, 25, 5)"><span class="ratio6-content hand-bounce text-cyan-400">👆</span></td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div id="conclusion-6" class="hidden mt-8 bg-gradient-to-r from-red-900 to-orange-900 text-white p-6 rounded-2xl border border-red-500 text-center">
+              <h3 class="text-2xl font-black mb-2 flex items-center justify-center gap-2">
+                <svg class="w-8 h-8 text-yellow-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                注意！比值变了！
+              </h3>
+              <p class="text-xl font-medium">
+                正方形的面积和边长的比值<strong class="text-yellow-300 text-3xl mx-2">不是固定的</strong>（比值等于边长本身）。<br/>
+                所以，正方形的面积和边长 <strong class="text-red-300 text-3xl mx-1">不成正比例</strong>！
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Slide 7: Quiz -->
+      <div id="slide-7" class="slide flex-col p-6 md:p-12 relative overflow-hidden">
+        <div class="starfield"></div>
+        
+        <div class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center z-10 gap-6">
+          <h2 class="text-4xl md:text-5xl font-black text-purple-400 flex items-center gap-4">
+            <svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            模块六：星际领航员考核
+          </h2>
+          <div class="flex items-center gap-6">
+            <div class="text-2xl font-bold text-yellow-400 bg-yellow-900/30 px-6 py-3 rounded-full border border-yellow-700 flex items-center gap-2">
+              <svg class="w-7 h-7 fill-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              当前积分: <span id="score-display">0</span>
+            </div>
+            <div class="text-2xl font-bold text-purple-300 bg-purple-900/50 px-8 py-3 rounded-full border border-purple-700">
+              题目 <span id="question-num">1</span> / 12
+            </div>
+          </div>
+        </div>
+        
+        <div id="quiz-container" class="flex-1 flex flex-col items-center justify-center max-w-5xl mx-auto w-full z-10">
+          <div id="quiz-content" class="w-full card p-10 md:p-14 border-t-8 border-purple-500">
+            <!-- Quiz content will be dynamically inserted -->
+          </div>
+        </div>
+        
+        <div id="quiz-finished" class="hidden flex-1 flex flex-col items-center justify-center max-w-3xl mx-auto w-full z-10">
+          <div class="card p-16 text-center">
+            <h2 class="text-5xl md:text-6xl font-black text-purple-400 mb-8">终极考核完成！🎉</h2>
+            <p class="text-3xl md:text-4xl mb-12 font-medium">
+              你的总积分：<span id="final-score" class="text-6xl md:text-7xl font-black text-yellow-400 mx-4">0</span> / 36
+            </p>
+            <p id="score-message" class="text-3xl font-bold mb-12 leading-relaxed"></p>
+            <button onclick="restartQuiz()" class="inline-flex items-center justify-center gap-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-12 py-6 rounded-full text-3xl font-bold hover:from-purple-500 hover:to-indigo-500 transition-all border border-purple-400">
+              <svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                <path d="M16 16h5v5"/>
+              </svg>
+              重新挑战
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Slide 8: Summary -->
+      <div id="slide-8" class="slide flex-col p-6 md:p-12 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-slate-950 to-slate-950"></div>
+        <div class="starfield"></div>
+        
+        <div class="mb-10 flex items-center gap-4 z-10">
+          <svg class="w-12 h-12 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+          </svg>
+          <h2 class="text-4xl md:text-5xl font-black text-cyan-400">
+            星际航行总结：我们的收获
+          </h2>
+        </div>
+        
+        <div class="flex-1 flex flex-col items-center justify-center max-w-6xl mx-auto w-full z-10 gap-8">
+          <div class="w-full card p-10 relative overflow-hidden">
+            <div class="absolute -right-20 -top-20 text-cyan-500/10 rotate-12">
+              <svg class="w-72 h-72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+              </svg>
+            </div>
+            
+            <h3 class="text-4xl font-bold text-white mb-8 flex items-center gap-3">
+              <svg class="w-9 h-9 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              这节课，我们学到了什么？
+            </h3>
+            
+            <ul class="space-y-6 text-2xl md:text-3xl text-slate-200 leading-relaxed font-medium ml-4">
+              <li class="flex items-start gap-4">
+                <span class="text-cyan-400 mt-1">🚀</span>
+                <p>认识了什么是<strong class="text-cyan-300 mx-2 text-4xl">正比例关系</strong>：两种相关联的量，一种量变化，另一种量也随着变化。</p>
+              </li>
+              <li class="flex items-start gap-4">
+                <span class="text-purple-400 mt-1">✨</span>
+                <p>找到了正比例的"灵魂"：如果这两种量中相对应的两个数的<strong class="text-purple-300 mx-2 text-4xl">比值（商）一定</strong>，它们就成正比例。</p>
+              </li>
+              <li class="flex items-start gap-4">
+                <span class="text-emerald-400 mt-1">📝</span>
+                <p>学会了<strong class="text-emerald-300 mx-2 text-4xl">三步判断法</strong>：①两种量是否相关联？②一种变化另一种是否变化？③比值是否一定？</p>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="w-full bg-gradient-to-br from-purple-900/40 to-indigo-900/40 backdrop-blur-md p-10 rounded-3xl border border-purple-500/30">
+            <h3 class="text-4xl font-bold text-white mb-8 flex items-center gap-3">
+              <svg class="w-9 h-9 text-fuchsia-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              星际探讨：你还有什么疑问吗？
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xl md:text-2xl text-indigo-100">
+              <div class="bg-slate-950/50 p-6 rounded-2xl border border-indigo-500/30 hover:border-indigo-400 transition-colors">
+                <p class="flex items-center gap-3 mb-2">
+                  <svg class="w-6 h-6 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                  </svg>
+                  思考题 1
+                </p>
+                <p>既然有"正比例"，那会不会有"反比例"呢？如果乘积一定，会发生什么？</p>
+              </div>
+              <div class="bg-slate-950/50 p-6 rounded-2xl border border-indigo-500/30 hover:border-indigo-400 transition-colors">
+                <p class="flex items-center gap-3 mb-2">
+                  <svg class="w-6 h-6 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                  </svg>
+                  思考题 2
+                </p>
+                <p>在你的日常生活中，还能找到哪些成正比例的例子？（比如：买文具、走路...）</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Navigation Bar -->
+    <nav id="navbar" class="navbar">
+      <div class="h-24 flex items-center justify-between px-8">
+        <div class="flex items-center gap-4 w-1/4">
+          <button id="collapse-btn" onclick="toggleNavbar()" class="nav-btn text-cyan-400" title="收起导航栏">
+            <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+          <button id="prev-btn" onclick="prevSlide()" disabled class="nav-btn" aria-label="上一页">
+            <svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <span class="text-slate-400 text-xl hidden lg:block">← → 切换页面</span>
+        </div>
+        
+        <div class="flex items-center justify-center gap-4 w-1/2" id="nav-dots">
+          <!-- Dots will be generated by JS -->
+        </div>
+        
+        <div class="flex items-center justify-end gap-2 w-1/4">
+          <div class="text-right mr-4 hidden lg:block">
+            <p id="slide-title" class="text-cyan-400 font-bold text-xl">课前互动</p>
+            <p id="slide-counter" class="text-slate-500 text-lg">1 / 9</p>
+          </div>
+          
+          <button id="sound-btn" onclick="toggleSound()" class="nav-btn" title="关闭音效">
+            <svg id="sound-on-icon" class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            </svg>
+            <svg id="sound-off-icon" class="w-7 h-7 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <line x1="22" y1="9" x2="16" y2="15"/>
+              <line x1="16" y1="9" x2="22" y2="15"/>
+            </svg>
+          </button>
+          
+          <div class="w-px h-10 bg-slate-700"></div>
+          
+          <button id="next-btn" onclick="nextSlide()" class="nav-btn" aria-label="下一页">
+            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+          
+          <div class="w-px h-10 bg-slate-700"></div>
+          
+          <button id="fullscreen-btn" onclick="toggleFullscreen()" class="nav-btn" title="全屏模式">
+            <svg id="fullscreen-icon" class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+              <path d="M21 8V5a2 2 0 0 0-2-2h-3"/>
+              <path d="M3 16v3a2 2 0 0 0 2 2h3"/>
+              <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+            </svg>
+            <svg id="exit-fullscreen-icon" class="w-7 h-7 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3v3a2 2 0 0 1-2 2H3"/>
+              <path d="M21 8h-3a2 2 0 0 1-2-2V3"/>
+              <path d="M3 16h3a2 2 0 0 1 2 2v3"/>
+              <path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+    
+    <button id="expand-btn" class="expand-btn" onclick="toggleNavbar()" title="展开导航栏">
+      <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    // ==================== Global State ====================
+    const TOTAL_SLIDES = 9;
+    const slideTitles = ['课前互动', '引入', '情境探索', '数据分析', '概念学习', '周长正例', '面积反例', '综合练习', '总结升华'];
+    
+    let currentSlide = 0;
+    let soundEnabled = true;
+    let isNavbarCollapsed = false;
+    let records = [];
+    let hours = 1;
+    let revealedRatios = [];
+    let revealedRatios5 = [];
+    let revealedRatios6 = [];
+    let revealedDestinations = [];
+    
+    // Audio Context
+    let audioContext = null;
+    
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    
+    function playTone(frequency, duration, type = 'sine', volume = 0.3) {
+      if (!audioContext || !soundEnabled) return;
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = frequency;
+      oscillator.type = type;
+      
+      const now = audioContext.currentTime;
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(volume, now + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration + 0.1);
+      
+      oscillator.start(now);
+      oscillator.stop(now + duration + 0.1);
+    }
+    
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      
+      switch(type) {
+        case 'click':
+          playTone(1000, 0.04, 'sine', 0.12);
+          break;
+        case 'correct':
+          playTone(523, 0.12, 'sine', 0.18);
+          setTimeout(() => playTone(659, 0.12, 'sine', 0.22), 80);
+          setTimeout(() => playTone(784, 0.25, 'sine', 0.25), 160);
+          break;
+        case 'wrong':
+          playTone(220, 0.15, 'triangle', 0.2);
+          setTimeout(() => playTone(165, 0.25, 'triangle', 0.25), 120);
+          break;
+        case 'reveal':
+          playTone(350, 0.1, 'sine', 0.15);
+          setTimeout(() => playTone(480, 0.1, 'sine', 0.2), 70);
+          setTimeout(() => playTone(620, 0.15, 'sine', 0.25), 140);
+          break;
+        case 'launch':
+          playTone(60, 1, 'sawtooth', 0.2);
+          setTimeout(() => playTone(500, 0.15, 'sine', 0.15), 400);
+          setTimeout(() => playTone(700, 0.15, 'sine', 0.18), 460);
+          setTimeout(() => playTone(900, 0.2, 'sine', 0.22), 520);
+          break;
+        case 'celebration':
+          const notes = [523, 587, 659, 698, 784, 880, 988, 1047];
+          notes.forEach((note, i) => {
+            setTimeout(() => playTone(note, 0.18, 'sine', 0.2), i * 70);
+          });
+          break;
+      }
+    }
+    
+    // ==================== Navigation ====================
+    function goToSlide(index) {
+      if (index === currentSlide) return;
+      playSound('click');
+      
+      const slides = document.querySelectorAll('.slide');
+      slides[currentSlide].classList.remove('active');
+      slides[index].classList.add('active');
+      
+      currentSlide = index;
+      updateNavigation();
+    }
+    
+    function nextSlide() {
+      if (currentSlide < TOTAL_SLIDES - 1) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+    
+    function prevSlide() {
+      if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+    
+    function updateNavigation() {
+      // Update dots
+      const dots = document.querySelectorAll('.nav-dot');
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentSlide);
+      });
+      
+      // Update buttons
+      document.getElementById('prev-btn').disabled = currentSlide === 0;
+      document.getElementById('next-btn').disabled = currentSlide === TOTAL_SLIDES - 1;
+      
+      // Update title and counter
+      document.getElementById('slide-title').textContent = slideTitles[currentSlide];
+      document.getElementById('slide-counter').textContent = `${currentSlide + 1} / ${TOTAL_SLIDES}`;
+    }
+    
+    function toggleNavbar() {
+      playSound('click');
+      isNavbarCollapsed = !isNavbarCollapsed;
+      
+      const navbar = document.getElementById('navbar');
+      const expandBtn = document.getElementById('expand-btn');
+      
+      navbar.classList.toggle('collapsed', isNavbarCollapsed);
+      expandBtn.classList.toggle('visible', isNavbarCollapsed);
+    }
+    
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('sound-on-icon').classList.toggle('hidden', !soundEnabled);
+      document.getElementById('sound-off-icon').classList.toggle('hidden', soundEnabled);
+    }
+    
+    function toggleFullscreen() {
+      playSound('click');
+      
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+    
+    // ==================== Slide 0: Warmup ====================
+    function generateStars(containerId, count = 200) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.className = 'absolute rounded-full';
+        star.style.cssText = `
+          width: ${Math.random() * 2 + 0.5}px;
+          height: ${Math.random() * 2 + 0.5}px;
+          top: ${Math.random() * 100}%;
+          left: ${Math.random() * 100}%;
+          background: #fff;
+          box-shadow: 0 0 ${Math.random() * 2 + 1}px #fff;
+          animation: twinkle ${Math.random() * 3 + 1.5}s ease-in-out infinite;
+          animation-delay: ${Math.random() * 2}s;
+        `;
+        container.appendChild(star);
+      }
+    }
+    
+    function generateFlameParticles() {
+      const container = document.getElementById('flame-particles');
+      if (!container) return;
+      
+      for (let i = 0; i < 12; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'absolute';
+        particle.style.cssText = `
+          bottom: -30px;
+          left: 50%;
+          transform: translateX(-50%) rotate(${-15 + i * 3}deg);
+          transform-origin: top center;
+          width: 4px;
+          height: 20px;
+          background: linear-gradient(to top, #22d3ee, #3b82f6, transparent);
+          clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+          animation: flame ${0.3 + i * 0.05}s ease-in-out infinite;
+          animation-delay: ${i * 0.02}s;
+        `;
+        container.appendChild(particle);
+      }
+    }
+    
+    function startWarmup() {
+      playSound('click');
+      document.getElementById('step-0-intro').classList.add('hidden');
+      document.getElementById('step-1-guessing').classList.remove('hidden');
+    }
+    
+    function revealDestination(index) {
+      if (revealedDestinations.includes(index)) return;
+      
+      playSound('reveal');
+      revealedDestinations.push(index);
+      
+      const times = [3.8, 550, 6300];
+      const element = document.getElementById(`dest-${index}`);
+      element.innerHTML = `
+        <div class="bg-emerald-900/50 rounded-2xl p-4 border border-emerald-500">
+          <p class="text-2xl text-emerald-300 mb-2">需要时间</p>
+          <p class="text-5xl font-black text-emerald-400">${times[index].toLocaleString()} 小时</p>
+        </div>
+      `;
+      
+      if (revealedDestinations.length === 3) {
+        document.getElementById('show-summary-btn').classList.remove('hidden');
+      }
+    }
+    
+    function showSummary() {
+      playSound('click');
+      document.getElementById('step-1-guessing').classList.add('hidden');
+      document.getElementById('step-2-summary').classList.remove('hidden');
+    }
+    
+    // ==================== Slide 2: Scenario ====================
+    function updateHours(value) {
+      hours = parseInt(value);
+      const distance = hours * 2;
+      
+      document.getElementById('hours-display').textContent = hours;
+      document.getElementById('distance-display').textContent = distance;
+      
+      const rocketTrack = document.getElementById('rocket-track');
+      rocketTrack.style.left = `${(hours / 10) * 85 + 5}%`;
+    }
+    
+    function recordData() {
+      if (records.find(r => r.x === hours)) return;
+      
+      playSound('click');
+      const distance = hours * 2;
+      records.push({ x: hours, y: distance });
+      records.sort((a, b) => a.x - b.x);
+      
+      updateRecordsList();
+    }
+    
+    function updateRecordsList() {
+      const container = document.getElementById('records-list');
+      
+      if (records.length === 0) {
+        container.innerHTML = '点击左侧"记录当前航行数据"按钮添加记录';
+        container.className = 'flex-1 flex items-center justify-center text-slate-500 text-2xl border-2 border-dashed border-slate-700 rounded-2xl bg-slate-800/50';
+        return;
+      }
+      
+      container.className = 'flex-1 overflow-y-auto space-y-4';
+      container.innerHTML = records.map((record, index) => `
+        <div class="flex justify-between items-center bg-slate-800 p-6 rounded-2xl border border-slate-600">
+          <span class="text-2xl font-bold text-slate-400">第 ${index + 1} 次记录</span>
+          <div class="flex gap-8 text-2xl font-medium">
+            <span>时间: <strong class="text-cyan-400">${record.x} 小时</strong></span>
+            <span>距离: <strong class="text-yellow-400">${record.y} 万千米</strong></span>
+          </div>
+        </div>
+      `).join('');
+      
+      if (records.length >= 3) {
+        document.getElementById('records-hint').classList.remove('hidden');
+      }
+    }
+    
+    // ==================== Slide 3: Table ====================
+    function revealRatio(index, y, x) {
+      if (revealedRatios.includes(index)) return;
+      
+      playSound('reveal');
+      revealedRatios.push(index);
+      
+      const cells = document.querySelectorAll('.ratio-content');
+      cells[index].innerHTML = `<span class="text-lg text-emerald-300/70">${y} ÷ ${x} =</span><br><span class="text-4xl font-bold text-emerald-400">${y / x}</span>`;
+      cells[index].classList.remove('hand-bounce');
+      
+      if (revealedRatios.length === 5) {
+        document.getElementById('table-conclusion').classList.remove('hidden');
+      }
+    }
+    
+    // ==================== Slide 4: Concept ====================
+    let dragItems = [
+      { id: '1', text: '小明的年龄和身高', isProportional: false, reason: '虽然年龄增长身高也增长（相关联、同向变化），但身高÷年龄不是固定值，比值不固定', zone: 'unclassified' },
+      { id: '2', text: '一本书已读页数和未读页数', isProportional: false, reason: '虽然相关联，但已读页数增加，未读页数反而减少，变化方向相反', zone: 'unclassified' },
+      { id: '3', text: '小红的身高和班级人数', isProportional: false, reason: '这两个量没有关系，一个变化另一个不会跟着变化，不相关联', zone: 'unclassified' },
+      { id: '4', text: '圆的周长和直径', isProportional: true, reason: '周长÷直径=π（一定），三个条件都满足：相关联、同向变化、比值一定', zone: 'unclassified' }
+    ];
+    
+    function showDefinition() {
+      playSound('reveal');
+      document.getElementById('unlock-btn').classList.add('hidden');
+      document.getElementById('definition-content').classList.remove('hidden');
+      document.getElementById('drag-game').classList.remove('hidden');
+      
+      initDragItems();
+    }
+    
+    function initDragItems() {
+      const unclassifiedZone = document.getElementById('unclassified-zone');
+      
+      dragItems.filter(item => item.zone === 'unclassified').forEach(item => {
+        const el = document.createElement('div');
+        el.id = `item-${item.id}`;
+        el.className = 'drag-item bg-slate-700 p-3 rounded-xl shadow-lg border border-slate-500 text-lg font-bold text-center hover:bg-slate-600 transition-colors text-slate-100';
+        el.draggable = true;
+        el.textContent = item.text;
+        el.ondragstart = (e) => handleDragStart(e, item.id);
+        unclassifiedZone.appendChild(el);
+      });
+    }
+    
+    function handleDragStart(e, id) {
+      e.dataTransfer.setData('text/plain', id);
+      e.dataTransfer.effectAllowed = 'move';
+    }
+    
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      e.currentTarget.classList.add('drag-over');
+    }
+    
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+    
+    function handleDrop(e, zone) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      
+      const id = e.dataTransfer.getData('text/plain');
+      const item = dragItems.find(i => i.id === id);
+      if (!item) return;
+      
+      // Check if correct
+      const isCorrect = (zone === 'yes' && item.isProportional) || (zone === 'no' && !item.isProportional);
+      
+      if (zone !== 'unclassified') {
+        if (isCorrect) {
+          playSound('correct');
+        } else {
+          playSound('wrong');
+        }
+      }
+      
+      // Update item zone
+      item.zone = zone;
+      
+      // Move element
+      const el = document.getElementById(`item-${id}`);
+      if (el) {
+        el.remove();
+        
+        if (zone !== 'unclassified') {
+          const newEl = document.createElement('div');
+          newEl.className = `p-3 rounded-xl shadow-lg border-2 text-lg font-bold text-center cursor-grab transition-colors ${
+            isCorrect 
+              ? 'bg-emerald-800/80 border-emerald-500 text-emerald-100' 
+              : 'bg-red-900/80 border-red-500 text-red-100'
+          }`;
+          newEl.draggable = true;
+          newEl.innerHTML = `${item.text}<br><span class="text-sm">${isCorrect ? '✅ 正确！' : '❌ 再想想'}</span>`;
+          newEl.ondragstart = (e) => handleDragStart(e, id);
+          document.getElementById(`${zone}-zone`).appendChild(newEl);
+        }
+      }
+      
+      // Check if all classified
+      const allClassified = dragItems.every(i => i.zone !== 'unclassified');
+      if (allClassified) {
+        document.getElementById('show-reasons-btn').classList.remove('hidden');
+      }
+    }
+    
+    function showReasons() {
+      playSound('reveal');
+      document.getElementById('show-reasons-btn').classList.add('hidden');
+      document.getElementById('reasons-section').classList.remove('hidden');
+      
+      const reasonsList = document.getElementById('reasons-list');
+      reasonsList.innerHTML = dragItems.map(item => `
+        <div class="p-2 rounded-lg border flex items-start gap-2 ${item.isProportional ? 'bg-emerald-900/30 border-emerald-600' : 'bg-red-900/30 border-red-600'}">
+          <svg class="w-4 h-4 ${item.isProportional ? 'text-emerald-400' : 'text-red-400'} flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            ${item.isProportional 
+              ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+              : '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>'}
+          </svg>
+          <div>
+            <span class="font-bold text-sm">${item.text}</span>
+            <p class="text-xs text-slate-300 mt-0.5">${item.reason}</p>
+          </div>
+        </div>
+      `).join('');
+      
+      document.getElementById('show-conditions-btn').classList.remove('hidden');
+    }
+    
+    function showConditions() {
+      playSound('reveal');
+      document.getElementById('show-conditions-btn').classList.add('hidden');
+      document.getElementById('conditions-panel').classList.remove('hidden');
+    }
+    
+    // ==================== Slide 5: Square Perimeter ====================
+    function updateSide5(value) {
+      const side = parseInt(value);
+      const perimeter = side * 4;
+      
+      document.getElementById('side-display-5').textContent = side;
+      document.getElementById('side-label-5-top').textContent = side + 'm';
+      document.getElementById('side-label-5-right').textContent = side + 'm';
+      document.getElementById('perimeter-display-5').textContent = `周长: ${perimeter}m`;
+      
+      const square = document.getElementById('square-5');
+      square.style.width = side * 40 + 'px';
+      square.style.height = side * 40 + 'px';
+    }
+    
+    function revealRatio5(index, y, x) {
+      if (revealedRatios5.includes(index)) return;
+      
+      playSound('reveal');
+      revealedRatios5.push(index);
+      
+      const cells = document.querySelectorAll('.ratio5-content');
+      cells[index].textContent = y / x;
+      cells[index].classList.remove('hand-bounce');
+      cells[index].classList.add('text-emerald-400', 'font-bold');
+      
+      if (revealedRatios5.length === 5) {
+        document.getElementById('conclusion-5').classList.remove('hidden');
+      }
+    }
+    
+    // ==================== Slide 6: Square Area ====================
+    function updateSide6(value) {
+      const side = parseInt(value);
+      const area = side * side;
+      
+      document.getElementById('side-display-6').textContent = side;
+      document.getElementById('side-label-6-top').textContent = side + 'm';
+      document.getElementById('side-label-6-right').textContent = side + 'm';
+      document.getElementById('area-display-6').textContent = `面积: ${area}m²`;
+      
+      const square = document.getElementById('square-6');
+      square.style.width = side * 40 + 'px';
+      square.style.height = side * 40 + 'px';
+    }
+    
+    function revealRatio6(index, y, x) {
+      if (revealedRatios6.includes(index)) return;
+      
+      playSound('reveal');
+      revealedRatios6.push(index);
+      
+      const cells = document.querySelectorAll('.ratio6-content');
+      cells[index].textContent = y / x;
+      cells[index].classList.remove('hand-bounce');
+      cells[index].classList.add('text-red-400', 'font-bold');
+      
+      if (revealedRatios6.length === 5) {
+        document.getElementById('conclusion-6').classList.remove('hidden');
+      }
+    }
+    
+    // ==================== Slide 7: Quiz ====================
+    const questions = [
+      { id: 1, type: 'choice', category: '概念判断', difficulty: 1, points: 1, text: "判断题：两种相关联的量，只要一种量增加，另一种量也增加，它们就一定成正比例。对吗？", options: [{id:'A', text:'对', isCorrect:false}, {id:'B', text:'错', isCorrect:true}], explanation: "错！必须是它们的【比值（商）一定】，才能叫成正比例。仅仅是一起增加是不够的（比如人的年龄和身高）。" },
+      { id: 2, type: 'choice', category: '概念判断', difficulty: 2, points: 2, text: "判断题：正方形的【周长】和【边长】成正比例吗？", options: [{id:'A', text:'成正比例', isCorrect:true}, {id:'B', text:'不成正比例', isCorrect:false}], explanation: "正确！因为 周长 ÷ 边长 = 4（一定），比值固定，所以成正比例。" },
+      { id: 3, type: 'choice', category: '概念判断', difficulty: 3, points: 3, text: "判断题：正方形的【面积】和【边长】成正比例吗？", options: [{id:'A', text:'成正比例', isCorrect:false}, {id:'B', text:'不成正比例', isCorrect:true}], explanation: "正确！因为 面积 ÷ 边长 = 边长。边长是变化的，所以比值不固定，不成正比例！" },
+      { id: 4, type: 'table-choice', category: '表格计算', difficulty: 1, points: 1, text: "已知 x 和 y 成正比例，请选择表格中缺失的数字。", tableData: { x: [2, 4], y: [6, '?'] }, options: [{id:'A', text:'8', isCorrect:false}, {id:'B', text:'10', isCorrect:false}, {id:'C', text:'12', isCorrect:true}, {id:'D', text:'14', isCorrect:false}], explanation: "y ÷ x = 6 ÷ 2 = 3。比值是3，所以 ? ÷ 4 = 3，得出 ? = 12。" },
+      { id: 5, type: 'table-choice', category: '表格计算', difficulty: 2, points: 2, text: "买同一种苹果，数量 x 和总价 y 成正比例。请选择缺失的数字。", tableData: { x: [3, 5], y: [15, '?'] }, options: [{id:'A', text:'20', isCorrect:false}, {id:'B', text:'25', isCorrect:true}, {id:'C', text:'30', isCorrect:false}, {id:'D', text:'45', isCorrect:false}], explanation: "单价 = 总价 ÷ 数量 = 15 ÷ 3 = 5元。买5个就是 5 × 5 = 25元。" },
+      { id: 6, type: 'table-choice', category: '表格计算', difficulty: 3, points: 3, text: "飞船匀速飞行，时间 x 和距离 y 成正比例。请选择缺失的数字。", tableData: { x: [1.5, '?'], y: [90, 150] }, options: [{id:'A', text:'2.0', isCorrect:false}, {id:'B', text:'2.5', isCorrect:true}, {id:'C', text:'3.0', isCorrect:false}, {id:'D', text:'3.5', isCorrect:false}], explanation: "速度 = 距离 ÷ 时间 = 90 ÷ 1.5 = 60。时间 = 距离 ÷ 速度 = 150 ÷ 60 = 2.5。" },
+      { id: 7, type: 'choice', category: '生活应用', difficulty: 1, points: 1, text: "速度一定，汽车行驶的【路程】和【时间】成正比例吗？", options: [{id:'A', text:'成正比例', isCorrect:true}, {id:'B', text:'不成正比例', isCorrect:false}], explanation: "成正比例！因为 路程 ÷ 时间 = 速度（一定）。" },
+      { id: 8, type: 'choice', category: '生活应用', difficulty: 2, points: 2, text: "总钱数一定，买笔记本的【单价】和【数量】成正比例吗？", options: [{id:'A', text:'成正比例', isCorrect:false}, {id:'B', text:'不成正比例', isCorrect:true}], explanation: "不成正比例！因为 单价 × 数量 = 总钱数（乘积一定），而不是比值一定。这其实是反比例关系哦！" },
+      { id: 9, type: 'choice', category: '生活应用', difficulty: 3, points: 3, text: "圆的【面积】和【半径的平方】成正比例吗？", options: [{id:'A', text:'成正比例', isCorrect:true}, {id:'B', text:'不成正比例', isCorrect:false}], explanation: "成正比例！这是一个高级陷阱题。面积 ÷ (半径的平方) = π (圆周率)。因为 π 是一个固定的常数，所以它们成正比例！" },
+      { id: 10, type: 'choice', category: '综合判断', difficulty: 2, points: 2, text: "如果 y = 5x，那么 y 和 x 成正比例吗？", options: [{id:'A', text:'成正比例', isCorrect:true}, {id:'B', text:'不成正比例', isCorrect:false}], explanation: "成正比例！因为 y ÷ x = 5，比值是固定的常数 5。" },
+      { id: 11, type: 'choice', category: '综合判断', difficulty: 3, points: 3, text: "如果 y = x + 5，那么 y 和 x 成正比例吗？", options: [{id:'A', text:'成正比例', isCorrect:false}, {id:'B', text:'不成正比例', isCorrect:true}], explanation: "不成正比例！虽然 x 增加 y 也增加，但 y ÷ x = (x+5)÷x = 1 + 5/x，比值是变化的！" },
+      { id: 12, type: 'choice', category: '综合判断', difficulty: 1, points: 1, text: "判断题：一个人的【年龄】和【身高】成正比例。", options: [{id:'A', text:'对', isCorrect:false}, {id:'B', text:'错', isCorrect:true}], explanation: "错！年龄增长，身高不一定增长（成年后身高基本不变），而且身高÷年龄也不是固定值。" }
+    ];
+    
+    let currentQuestion = 0;
+    let quizScore = 0;
+    let selectedOption = null;
+    let showExplanation = false;
+    
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      const container = document.getElementById('quiz-content');
+      
+      let optionsHtml = '';
+      
+      if (q.type === 'choice') {
+        optionsHtml = `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            ${q.options.map(opt => `
+              <button class="option-btn" data-id="${opt.id}" data-correct="${opt.isCorrect}" onclick="selectOption('${opt.id}', ${opt.isCorrect})">
+                <span>${opt.text}</span>
+              </button>
+            `).join('')}
+          </div>
+        `;
+      } else if (q.type === 'table-choice') {
+        optionsHtml = `
+          <div class="flex flex-col items-center gap-10">
+            <table class="w-full max-w-2xl text-center border-collapse text-4xl">
+              <tbody>
+                <tr>
+                  <th class="p-6 border-4 border-slate-600 bg-slate-800 text-cyan-400 w-1/4">x</th>
+                  ${q.tableData.x.map(val => `
+                    <td class="p-6 border-4 border-slate-600 font-medium text-slate-200">
+                      ${val === '?' ? '<span class="text-purple-400 font-bold text-5xl">?</span>' : val}
+                    </td>
+                  `).join('')}
+                </tr>
+                <tr>
+                  <th class="p-6 border-4 border-slate-600 bg-slate-800 text-yellow-400 w-1/4">y</th>
+                  ${q.tableData.y.map(val => `
+                    <td class="p-6 border-4 border-slate-600 font-medium text-yellow-300">
+                      ${val === '?' ? '<span class="text-purple-400 font-bold text-5xl">?</span>' : val}
+                    </td>
+                  `).join('')}
+                </tr>
+              </tbody>
+            </table>
+            <div class="grid grid-cols-2 gap-6 w-full max-w-2xl">
+              ${q.options.map(opt => `
+                <button class="option-btn" data-id="${opt.id}" data-correct="${opt.isCorrect}" onclick="selectOption('${opt.id}', ${opt.isCorrect})">
+                  <span>${opt.text}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = `
+        <div class="flex justify-between items-center mb-8">
+          <span class="text-2xl font-bold text-cyan-400 bg-cyan-900/30 px-6 py-2 rounded-xl border border-cyan-700">
+            类型: ${q.category}
+          </span>
+          <div class="flex items-center gap-1 bg-slate-800/80 px-4 py-2 rounded-full border border-slate-600">
+            <span class="text-slate-300 font-bold mr-2 text-xl">难度:</span>
+            ${[1,2,3].map(i => `
+              <svg class="w-6 h-6 ${i <= q.difficulty ? 'text-yellow-400 fill-yellow-400' : 'text-slate-600'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            `).join('')}
+            <span class="text-yellow-400 font-black ml-2 text-xl">(${q.points} 积分)</span>
+          </div>
+        </div>
+        
+        <h3 class="text-3xl md:text-4xl font-bold text-slate-100 mb-12 leading-relaxed">${q.text}</h3>
+        
+        ${optionsHtml}
+        
+        <div id="explanation-section" class="hidden mt-10">
+          <div id="explanation-box" class="p-8 rounded-3xl text-2xl font-medium border-2">
+            <p id="explanation-header" class="mb-4 font-bold text-3xl flex items-center gap-3"></p>
+            <p class="leading-relaxed text-slate-300">${q.explanation}</p>
+          </div>
+          <div class="mt-10 flex justify-end">
+            <button onclick="nextQuestion()" class="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-10 py-5 rounded-full text-2xl font-bold hover:from-cyan-500 hover:to-blue-500 transition-all flex items-center gap-3 border border-cyan-400">
+              ${currentQuestion < questions.length - 1 ? "下一题 ➡️" : "查看最终成绩 🏆"}
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('question-num').textContent = currentQuestion + 1;
+    }
+    
+    function selectOption(optionId, isCorrect) {
+      if (selectedOption) return;
+      
+      selectedOption = optionId;
+      
+      // Update button styles
+      const buttons = document.querySelectorAll('.option-btn');
+      buttons.forEach(btn => {
+        const btnId = btn.dataset.id;
+        const btnCorrect = btn.dataset.correct === 'true';
+        
+        if (btnId === optionId && isCorrect) {
+          btn.classList.add('correct');
+        } else if (btnId === optionId && !isCorrect) {
+          btn.classList.add('wrong');
+        } else if (btnCorrect) {
+          btn.classList.add('correct');
+          btn.style.opacity = '0.5';
+        } else {
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+        }
+      });
+      
+      // Update score
+      if (isCorrect) {
+        quizScore += questions[currentQuestion].points;
+        document.getElementById('score-display').textContent = quizScore;
+        playSound('correct');
+        triggerConfetti();
+      } else {
+        playSound('wrong');
+      }
+      
+      // Show explanation
+      const explanationSection = document.getElementById('explanation-section');
+      const explanationBox = document.getElementById('explanation-box');
+      const explanationHeader = document.getElementById('explanation-header');
+      
+      explanationSection.classList.remove('hidden');
+      
+      if (isCorrect) {
+        explanationBox.className = 'p-8 rounded-3xl text-2xl font-medium border-2 bg-emerald-900/30 text-emerald-200 border-emerald-500/50';
+        explanationHeader.innerHTML = `
+          <svg class="w-9 h-9 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          回答正确！获得 ${questions[currentQuestion].points} 积分 🎉
+        `;
+      } else {
+        explanationBox.className = 'p-8 rounded-3xl text-2xl font-medium border-2 bg-red-900/30 text-red-200 border-red-500/50';
+        explanationHeader.innerHTML = `
+          <svg class="w-9 h-9 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          回答错误！❌
+        `;
+      }
+    }
+    
+    function nextQuestion() {
+      playSound('click');
+      
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        selectedOption = null;
+        renderQuestion();
+      } else {
+        showQuizFinished();
+      }
+    }
+    
+    function showQuizFinished() {
+      document.getElementById('quiz-container').classList.add('hidden');
+      document.getElementById('quiz-finished').classList.remove('hidden');
+      
+      const maxScore = questions.reduce((sum, q) => sum + q.points, 0);
+      document.getElementById('final-score').textContent = quizScore;
+      
+      let message = '';
+      if (quizScore === maxScore) {
+        message = '太完美了！你已经完全掌握了正比例的奥秘，可以胜任最高级星际领航员了！🚀';
+        playSound('celebration');
+      } else if (quizScore >= maxScore * 0.7) {
+        message = '非常棒！你已经掌握了大部分知识，再复习一下错题就能拿满分！🌟';
+      } else {
+        message = '继续加油！再多复习一下正比例的概念，下次一定能拿到高分！💪';
+      }
+      document.getElementById('score-message').textContent = message;
+    }
+    
+    function restartQuiz() {
+      playSound('click');
+      currentQuestion = 0;
+      quizScore = 0;
+      selectedOption = null;
+      
+      document.getElementById('score-display').textContent = 0;
+      document.getElementById('quiz-container').classList.remove('hidden');
+      document.getElementById('quiz-finished').classList.add('hidden');
+      
+      renderQuestion();
+    }
+    
+    function triggerConfetti() {
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#22d3ee', '#34d399', '#facc15', '#c084fc']
+      });
+    }
+    
+    // ==================== Initialization ====================
+    function init() {
+      // Generate navigation dots
+      const navDots = document.getElementById('nav-dots');
+      for (let i = 0; i < TOTAL_SLIDES; i++) {
+        const dot = document.createElement('button');
+        dot.className = `nav-dot ${i === 0 ? 'active' : ''}`;
+        dot.onclick = () => goToSlide(i);
+        dot.setAttribute('aria-label', `跳转到第 ${i + 1} 页`);
+        navDots.appendChild(dot);
+      }
+      
+      // Generate stars
+      generateStars('stars-0', 200);
+      generateStars('stars-1', 400);
+      generateFlameParticles();
+      
+      // Initialize quiz
+      renderQuestion();
+      
+      // Update navigation
+      updateNavigation();
+      
+      // Keyboard navigation
+      document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        
+        if (e.key === 'ArrowRight') {
+          nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+          prevSlide();
+        }
+      });
+      
+      // Fullscreen change
+      document.addEventListener('fullscreenchange', () => {
+        const isFullscreen = !!document.fullscreenElement;
+        document.getElementById('fullscreen-icon').classList.toggle('hidden', isFullscreen);
+        document.getElementById('exit-fullscreen-icon').classList.toggle('hidden', !isFullscreen);
+      });
+      
+      // Initialize audio on first interaction
+      document.addEventListener('click', () => {
+        initAudio();
+      }, { once: true });
+    }
+    
+    // Start
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
