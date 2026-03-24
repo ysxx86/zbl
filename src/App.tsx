@@ -156,7 +156,7 @@ export default function App() {
             height: isNavbarCollapsed ? 0 : 'auto',
             opacity: isNavbarCollapsed ? 0 : 1
           }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}>
+          transition={{ duration: 0.3, ease: "easeInOut" }}
         >
           <div className="h-24 flex items-center justify-between px-8">
             <div className="flex items-center gap-4 w-1/4">
